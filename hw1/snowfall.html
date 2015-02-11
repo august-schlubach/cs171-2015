@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Minimal D3 Example</title>
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	</head>
+	<body>
+		<script>
+		var dataset;
+		d3.json("data/snowfall_annual.json", function(json) {
+			dataset = json;
+			console.log(dataset);
+		});
+		</script>
+	</body>
+</html>
