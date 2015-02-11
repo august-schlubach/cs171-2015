@@ -4,14 +4,40 @@
 		<meta charset="utf-8">
 		<title>Minimal D3 Example</title>
 		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<style>
+			.chart div {
+			  font: 10px sans-serif;
+			  background-color: steelblue;
+			  text-align: right;
+			  padding: 3px;
+			  margin: 1px;
+			  color: white;
+			}
+		</style>
 	</head>
 	<body>
+		<div class="chart">
+		</div>
 		<script>
 		var dataset;
 		d3.json("data/snowfall_annual.json", function(json) {
 			dataset = json;
 			console.log(dataset);
-		});
+
+			var x = d3.scale.linear()
+			    .domain([0, 108])
+			    .range([0, 600]);
+
+			d3.select(".chart")
+			  .selectAll("div")
+			    .data(dataset)
+			    .enter()
+			    .append("div")
+			    .style("width", function(d) { return x(d.Tot) + "px"; })
+			    .text(function(d) { return d.Tot; });
+
+
+	});
 		</script>
 	</body>
 </html>
