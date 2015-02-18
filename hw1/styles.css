@@ -2,6 +2,14 @@ div.container {
     width:98%; 
     margin:1%;
 }
+div.filter-container{
+	width:100%;
+}
+div.filters{
+    margin-left: auto;
+    margin-right: auto;
+    width: 800px;
+}
 .data-table {
 	margin:0px;padding:0px;
 	width:800px;

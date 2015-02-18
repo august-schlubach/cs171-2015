@@ -8,19 +8,44 @@
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script>
 
+      function filterBox(x) {
+        // hide everthing by default
+        d3.selectAll("tr").style("visibility", function(d,i) { if (i>0) { return "hidden"} else { return "visible"; } });
+
+        d3.selectAll("input").each(function(d) { 
+
+          if(d3.select(this).attr("type") == "checkbox" && d3.select(this).node().checked) {
+          // Current name of the checkbox is d3.select(this).attr("name")
+            box = this.name;
+            console.log("checked:" + this.name);
+            var group = d3.selectAll("tr").selectAll("td").style("visibility", function(d, i){ 
+              //var tx = d.text();
+              //var tr = d3.selectAll("td:nth-child(2)").text();
+              if (i==1) {
+                if (d == box) {
+
+                  console.log("show");
+                  console.log('tr value: ' + d + ' i ' + i + " box " + box);
+                  return "visible";
+                } 
+              }
+
+
+            });
+          }
+        });
+      }
+
       d3.json("data/countries_2012.json", function(error, data){
 
-        var columns = Object.keys(data[0]);
-
-        // define some formatting
-        var comma = d3.format(",");
-        var order = "up";
+        var comma = d3.format(","); // define some formatting
+        var order = "up";           // set initial order state
 
         // create a simplified version of the data set 
         var simple_columns = ['name', 'continent', 'gdp', 'life_expectancy', 'population', 'year'];
         var simple_data = function(d) { return [d.name, d.continent, comma(d3.round(d.gdp/1000000, 0)) + 'M', d3.round(d.life_expectancy, 1), comma(d.population), d.year]}
               
-        var table = d3.select("div").append("table").attr("class", "data-table"),
+        var table = d3.select("div.container").append("table").attr("class", "data-table"),
             thead = table.append("thead")
                       .attr("class", "thead");
             tbody = table.append("tbody");
@@ -95,11 +120,9 @@
               // otherwise just sort by class
               else {
                 if (class_name == 'up') {
-                  // sort by alpha
                   return d3.descending(a[header], b[header]);
                 }
                 else  {
-                  // sort by alpha
                   return d3.ascending(a[header], b[header]);
                 }
               }
@@ -120,7 +143,12 @@
 
       });
     </script> 
-
+    <div class="filter-container">
+      <div class="filters">
+        <label>Asia<input type="checkbox" name="Asia" value="Asia" title="Asia" onchange="filterBox(this);"></input></label>
+        <label>Americas<input type="checkbox" name="Americas" value="Americas" title="Americas" onchange="filterBox(this);"></input></label>
+      </div>
+    </div>
     <div class="container">
     </div>
 
