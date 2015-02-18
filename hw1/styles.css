@@ -1,0 +1,88 @@
+div.container {
+    width:98%; 
+    margin:1%;
+}
+.data-table {
+	margin:0px;padding:0px;
+	width:800px;
+	border:1px solid #000000;
+	text-align:center; 
+    margin-left:auto; 
+    margin-right:auto; 
+	border-bottom-left-radius:0px;
+	border-bottom-right-radius:0px;
+	border-top-right-radius:0px;
+	border-top-left-radius:0px;
+}
+.data-table table{
+    border-collapse: collapse;
+    border-spacing: 0;
+	width:100%;
+	height:100%;
+	margin:0px;padding:0px;
+}
+.data-table tr:last-child td:last-child {
+	border-bottom-right-radius:0px;
+}
+.data-table table tr:first-child td:first-child {
+	border-top-left-radius:0px;
+}
+.data-table table tr:first-child td:last-child {
+	border-top-right-radius:0px;
+}
+.data-table tr:last-child td:first-child{
+	border-bottom-left-radius:0px;
+}
+.data-table tr:nth-child(odd){ background-color:#cccccc; }
+.data-table tr:nth-child(even){ background-color:#ffffff; }
+.data-table td{
+	vertical-align:middle;		
+	border:1px solid #000000;
+	border-width:0px 1px 1px 0px;
+	text-align:center;
+	padding:11px;
+	font-size:13px;
+	font-family:Courier;
+	font-weight:normal;
+	color:#000000;
+}
+.data-table tr:last-child td{
+	border-width:0px 1px 0px 0px;
+}
+.data-table tr td:last-child{
+	border-width:0px 0px 1px 0px;
+}
+.data-table tr:last-child td:last-child{
+	border-width:0px 0px 0px 0px;
+}
+thead th{
+	padding: 11px;
+	border:0px solid #000000;
+	text-align:center;
+	border-width:0px 0px 1px 1px;
+	font-size:18px;
+	font-family:Helvetica;
+	font-weight:bold;
+	color:#ffffff;
+}
+thead th{
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #4c4c4c), color-stop(1, #000000) );
+	background-color:#4c4c4c;
+}
+thead th:hover{
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #4c4c4c), color-stop(1, #000000) );
+	background-color:#4c4c4c;
+	color:#ddd;
+}
+.data-table tr:first-child td:first-child{
+	border-width:0px 0px 1px 0px;
+}
+.data-table tr:first-child td:last-child{
+	border-width:0px 0px 1px 1px;
+}
+caption {
+	font-size:28px;
+	font-family:Helvetica;
+	font-weight:bold;
+	padding: 21px;
+}
