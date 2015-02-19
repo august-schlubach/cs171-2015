@@ -8,40 +8,81 @@
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script>
 
-      var raw_data;
+      var raw_data     = new Array();
+      var years        = new Array();
+      var current_data = new Array();
 
-      d3.json("data/countries_2012.json", function(error, data){
-        raw_data = data;
+      d3.json("data/countries_1995_2012.json", function(error, data){
 
-        update_table(raw_data);
+        // transform the data into a flat format that we can more easily use
+        for (i in data) {
+          for (y in data[i].years) {
+              // create a new record: name, continent, 
+              // gdp, life_expectancy, population, year
+              var record = {
+                            'name'            : data[i].name,
+                            'continent'       : data[i].continent,
+                            'gdp'             : data[i].years[y].gdp,
+                            'life_expectancy' : data[i].years[y].life_expectancy,
+                            'population'      : data[i].years[y].population,
+                            'year'            : data[i].years[y].year
+                           };
+              raw_data.push(record);
+
+              // push years into an array to determin min/max
+              years.push(data[i].years[y].year);
+
+              // create an array of initial data by year (1995 to start)
+              if (data[i].years[y].year == '1995') {
+                current_data.push(record);
+              }
+          }
+        }
+
+        // set the max and min labels on the slider
+        document.getElementById('min_year').innerHTML = Math.min.apply(Math, years);
+        document.getElementById('max_year').innerHTML = Math.max.apply(Math, years);
+
+        update_table(current_data);
       });
 
       function filter(x) {
-        data = aggregationFilter(x);
+        yearFilter(x);
+        data = aggregationFilter();
         continentFilter(data);
       }
 
-      function aggregationFilter(x) {
-        var asia_population = 0;
-        var asia_gdp = 0;
-        var asia_life = 0;
-        var asia_total = 0;
-        var africa_population = 0;
-        var africa_gdp = 0;
-        var africa_life = 0;
-        var africa_total = 0;
-        var europe_population = 0;
-        var europe_gdp = 0;
-        var europe_life = 0;
-        var europe_total = 0;
+      function yearFilter(x) {
+          current_year = document.getElementById('slider-time').value;
+          current_data = [];
+          for (i in raw_data) {
+            if (current_year == raw_data[i].year) {
+              current_data.push(raw_data[i]);
+            }
+          }
+      }
+
+      function aggregationFilter() {
+        var asia_population     = 0;
+        var asia_gdp            = 0;
+        var asia_life           = 0;
+        var asia_total          = 0;
+        var africa_population   = 0;
+        var africa_gdp          = 0;
+        var africa_life         = 0;
+        var africa_total        = 0;
+        var europe_population   = 0;
+        var europe_gdp          = 0;
+        var europe_life         = 0;
+        var europe_total        = 0;
         var americas_population = 0;
-        var americas_gdp = 0;
-        var americas_life = 0;
-        var americas_total = 0; 
-        var oceania_population = 0;
-        var oceania_gdp = 0;
-        var oceania_life = 0;
-        var oceania_total = 0; 
+        var americas_gdp        = 0;
+        var americas_life       = 0;
+        var americas_total      = 0;
+        var oceania_population  = 0;
+        var oceania_gdp         = 0;
+        var oceania_life        = 0;
+        var oceania_total       = 0;
         var radio_value; 
 
         d3.selectAll("input").each(function(d) { 
@@ -52,49 +93,52 @@
         });
 
         if (radio_value == "none") {
-          return raw_data;
+          return current_data;
         }
         else {
           // aggregate GDP and population by continent
-          for (x = 0; x < raw_data.length; x++) {
-            if (raw_data[x].continent == 'Asia') {
-                asia_population += raw_data[x].population;
-                asia_gdp += raw_data[x].gdp;
-                asia_life += raw_data[x].life_expectancy;
+          for (x = 0; x < current_data.length; x++) {
+            if (current_data[x].continent == 'Asia') {
+                asia_population += current_data[x].population;
+                asia_gdp += current_data[x].gdp;
+                asia_life += current_data[x].life_expectancy;
                 asia_total += 1;
             }
-            else if (raw_data[x].continent == 'Africa') {
-                africa_population += raw_data[x].population;
-                africa_gdp += raw_data[x].gdp;
-                africa_life += raw_data[x].life_expectancy;
+            else if (current_data[x].continent == 'Africa') {
+                africa_population += current_data[x].population;
+                africa_gdp += current_data[x].gdp;
+                africa_life += current_data[x].life_expectancy;
                 africa_total += 1;
             }
-            else if (raw_data[x].continent == 'Europe') {
-                europe_population += raw_data[x].population;
-                europe_gdp += raw_data[x].gdp;
-                europe_life += raw_data[x].life_expectancy;
+            else if (current_data[x].continent == 'Europe') {
+                europe_population += current_data[x].population;
+                europe_gdp += current_data[x].gdp;
+                europe_life += current_data[x].life_expectancy;
                 europe_total += 1;
             }
-            else if (raw_data[x].continent == 'Americas') {
-                americas_population += raw_data[x].population;
-                americas_gdp += raw_data[x].gdp;
-                americas_life += raw_data[x].life_expectancy;
+            else if (current_data[x].continent == 'Americas') {
+                americas_population += current_data[x].population;
+                americas_gdp += current_data[x].gdp;
+                americas_life += current_data[x].life_expectancy;
                 americas_total += 1;
             }
-            else if (raw_data[x].continent == 'Oceania') {
-                oceania_population += raw_data[x].population;
-                oceania_gdp += raw_data[x].gdp;
-                oceania_life += raw_data[x].life_expectancy;
+            else if (current_data[x].continent == 'Oceania') {
+                oceania_population += current_data[x].population;
+                oceania_gdp += current_data[x].gdp;
+                oceania_life += current_data[x].life_expectancy;
                 oceania_total += 1;
             }                                    
           }
+
+          current_year = document.getElementById('slider-time').value;
+
           // put these into a data structure and send to render
           agg_data = new Array;
-          agg_data.push({ 'continent':'Asia', 'name':'Asia','population':asia_population,'gdp':asia_gdp,'year':'2012', 'life_expectancy':asia_life/asia_total});
-          agg_data.push({ 'continent':'Africa', 'name':'Africa','population':africa_population,'gdp':africa_gdp,'year':'2012', 'life_expectancy':africa_life/africa_total});
-          agg_data.push({ 'continent':'Europe', 'name':'Europe','population':europe_population,'gdp':europe_gdp,'year':'2012', 'life_expectancy':europe_life/europe_total});
-          agg_data.push({ 'continent':'Americas', 'name':'Americas','population':americas_population,'gdp':americas_gdp,'year':'2012', 'life_expectancy':americas_life/americas_total});
-          agg_data.push({ 'continent':'Oceania', 'name':'Oceania','population':oceania_population,'gdp':oceania_gdp,'year':'2012', 'life_expectancy':oceania_life/oceania_total});                                        
+          agg_data.push({ 'continent':'Asia', 'name':'Asia','population':asia_population,'gdp':asia_gdp,'year':current_year, 'life_expectancy':asia_life/asia_total});
+          agg_data.push({ 'continent':'Africa', 'name':'Africa','population':africa_population,'gdp':africa_gdp,'year':current_year, 'life_expectancy':africa_life/africa_total});
+          agg_data.push({ 'continent':'Europe', 'name':'Europe','population':europe_population,'gdp':europe_gdp,'year':current_year, 'life_expectancy':europe_life/europe_total});
+          agg_data.push({ 'continent':'Americas', 'name':'Americas','population':americas_population,'gdp':americas_gdp,'year':current_year, 'life_expectancy':americas_life/americas_total});
+          agg_data.push({ 'continent':'Oceania', 'name':'Oceania','population':oceania_population,'gdp':oceania_gdp,'year':current_year, 'life_expectancy':oceania_life/oceania_total});                                        
           return agg_data;
         }
 
@@ -133,7 +177,6 @@
           }
         }
 
-        //console.log(new_data);
         // reload table
         update_table(new_data);
       }
@@ -146,7 +189,7 @@
 
         // create a simplified version of the data set 
         var simple_columns = ['name', 'continent', 'gdp', 'life_expectancy', 'population', 'year'];
-        var simple_data = function(d) { return [d.name, d.continent, comma(d3.round(d.gdp/1000000, 0)) + 'M', d3.round(d.life_expectancy, 1), comma(d.population), d.year]}
+        var simple_data    = function(d) { return [d.name, d.continent, comma(d3.round(d.gdp/1000000, 0)) + 'M', d3.round(d.life_expectancy, 1), comma(d.population), d.year]}
               
         var table = d3.select("div.container").append("table").attr("class", "data-table"),
             thead = table.append("thead")
@@ -258,7 +301,9 @@
         <br/>
       Aggregation:
         <label>None<input type="radio" name="aggregation" value="none" checked="checked" onclick="filter(this);"></label>
-        <label>Continent<input type="radio" name="aggregation" value="continent" onclick="filter(this);"></label>              
+        <label>Continent<input type="radio" name="aggregation" value="continent" onclick="filter(this);"></label>   
+        <br/>
+        Time update: <span id="min_year"></span><input type="range" name="points" min="1995" max="2012" step="1" value="0" id="slider-time" oninput="filter(this.value);"> <span id="max_year"></span>          
       </div>
     </div>
     <div class="container">
