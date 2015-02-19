@@ -43,6 +43,7 @@ div.filters{
 }
 .data-table tr:nth-child(odd){ background-color:#cccccc; }
 .data-table tr:nth-child(even){ background-color:#ffffff; }
+.data-table tr:hover { background-color: yellow; }
 .data-table td{
 	vertical-align:middle;		
 	border:1px solid #000000;

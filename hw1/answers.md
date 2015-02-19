@@ -2,3 +2,4 @@
 
 1.2 The table is generated dynamically by D3. The data comes from countries_2012.json.
 
+2. It would be interesting to be able to set thresholds for GDP, population, and life expectancy. I would do this with a combination of a drop down select widget ('more than', 'less than') and an input field for an arbitrary value.
