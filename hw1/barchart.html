@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<link rel="stylesheet" type="text/css" href="chart.css">
+</head>
+<body>
+
+        <div class="filter-container">
+      <div class="filters">
+      Dimension:
+        <label>Population <input type="radio" name="dimension" value="population" onclick="filter(this);" checked="checked"></label>
+        <label>GDP        <input type="radio" name="dimension" value="gdp"        onclick="filter(this);"></label>   
+        <br/>        
+      Filter by: 
+        <label>Africa   <input type="checkbox" name="Africa"   value="Africa"   title="Africa"   onchange="filter(this);"></input></label>
+        <label>Americas <input type="checkbox" name="Americas" value="Americas" title="Americas" onchange="filter(this);"></input></label>
+        <label>Asia     <input type="checkbox" name="Asia"     value="Asia"     title="Asia"     onchange="filter(this);"></input></label>
+        <label>Europe   <input type="checkbox" name="Europe"   value="Europe"   title="Europe"   onchange="filter(this);"></input></label>
+        <label>Oceania  <input type="checkbox" name="Oceania"  value="Oceania"  title="Oceania"  onchange="filter(this);"></input></label>  
+        <br/>
+      Aggregation:
+        <label>None      <input type="radio" name="aggregation" value="none"      onclick="filter(this);" checked="checked"></label>
+        <label>Continent <input type="radio" name="aggregation" value="continent" onclick="filter(this);"></label>   
+        <br/>
+      Sort by:
+        <label>Name       <input type="radio" name="sort" value="name"       onclick="filter(this);"></label>
+        <label>Population <input type="radio" name="sort" value="population" onclick="filter(this);"></label>   
+        <label>GDP        <input type="radio" name="sort" value="gdp"        onclick="filter(this);"></label>           
+        <br/>        
+        Time update: <span id="min_year"></span><input type="range" name="points" min="1995" max="2012" step="1" value="0" id="slider-time" oninput="filter(this.value);"> current: <span id="current_year">1995</span>          
+      </div>
+    </div>
+    <div class="container">
+    </div>
+
+  <script type="text/javascript">
+
+
+    // load data
+    var raw_data     = new Array();
+    var years        = new Array();
+    var current_data = new Array();
+
+    d3.json("data/countries_1995_2012.json", function(error, data){
+
+
+        // transform the data into a flat format that we can more easily use
+        for (i in data) {
+          for (y in data[i].years) {
+              // create a new record: name, continent, 
+              // gdp, life_expectancy, population, year
+              var record = {
+                            'name'            : data[i].name,
+                            'continent'       : data[i].continent,
+                            'gdp'             : data[i].years[y].gdp,
+                            'life_expectancy' : data[i].years[y].life_expectancy,
+                            'population'      : data[i].years[y].population,
+                            'year'            : data[i].years[y].year
+                           };
+              raw_data.push(record);
+
+              // push years into an array to determin min/max
+              years.push(data[i].years[y].year);
+
+              // create an array of initial data by year (1995 to start)
+              if (data[i].years[y].year == '1995') {
+                current_data.push(record);
+              }
+          }
+        }
+
+        update_svg(current_data);
+    });
+
+    function filter(x){
+        data = raw_data;
+
+        // filter for year slider      
+        current_year = document.getElementById('slider-time').value;
+        document.getElementById('current_year').innerHTML = current_year;  
+        filter_data = [];
+        for (i in data) {
+            if (current_year == data[i].year) {
+              filter_data.push(data[i]);
+            }
+        }
+
+        // aggregation by continent    
+        var asia_population     = 0;
+        var asia_gdp            = 0;
+        var asia_life           = 0;
+        var asia_total          = 0;
+        var africa_population   = 0;
+        var africa_gdp          = 0;
+        var africa_life         = 0;
+        var africa_total        = 0;
+        var europe_population   = 0;
+        var europe_gdp          = 0;
+        var europe_life         = 0;
+        var europe_total        = 0;
+        var americas_population = 0;
+        var americas_gdp        = 0;
+        var americas_life       = 0;
+        var americas_total      = 0;
+        var oceania_population  = 0;
+        var oceania_gdp         = 0;
+        var oceania_life        = 0;
+        var oceania_total       = 0;
+        var radio_value; 
+
+        d3.selectAll("input").each(function(d) { 
+          if (d3.select(this).attr("type") == "radio" && d3.select(this).attr("name") == "aggregation" && d3.select(this).node().checked) {
+            radio_value = d3.select(this).attr("value");
+          }
+        });
+
+        if (radio_value != "none") {
+          // aggregate GDP and population by continent
+          for (x = 0; x < filter_data.length; x++) {
+            if (filter_data[x].continent == 'Asia') {
+                asia_population += filter_data[x].population;
+                asia_gdp += filter_data[x].gdp;
+                asia_life += filter_data[x].life_expectancy;
+                asia_total += 1;
+            }
+            else if (filter_data[x].continent == 'Africa') {
+                africa_population += filter_data[x].population;
+                africa_gdp += filter_data[x].gdp;
+                africa_life += filter_data[x].life_expectancy;
+                africa_total += 1;
+            }
+            else if (filter_data[x].continent == 'Europe') {
+                europe_population += filter_data[x].population;
+                europe_gdp += filter_data[x].gdp;
+                europe_life += filter_data[x].life_expectancy;
+                europe_total += 1;
+            }
+            else if (filter_data[x].continent == 'Americas') {
+                americas_population += filter_data[x].population;
+                americas_gdp += filter_data[x].gdp;
+                americas_life += filter_data[x].life_expectancy;
+                americas_total += 1;
+            }
+            else if (filter_data[x].continent == 'Oceania') {
+                oceania_population += filter_data[x].population;
+                oceania_gdp += filter_data[x].gdp;
+                oceania_life += filter_data[x].life_expectancy;
+                oceania_total += 1;
+            }                                    
+          }
+
+          current_year = document.getElementById('slider-time').value;
+
+          // put these into a data structure and send to render
+          agg_data = new Array;
+          agg_data.push({ 'continent':'Asia', 'name':'Asia','population':asia_population,'gdp':asia_gdp,'year':current_year, 'life_expectancy':asia_life/asia_total});
+          agg_data.push({ 'continent':'Africa', 'name':'Africa','population':africa_population,'gdp':africa_gdp,'year':current_year, 'life_expectancy':africa_life/africa_total});
+          agg_data.push({ 'continent':'Europe', 'name':'Europe','population':europe_population,'gdp':europe_gdp,'year':current_year, 'life_expectancy':europe_life/europe_total});
+          agg_data.push({ 'continent':'Americas', 'name':'Americas','population':americas_population,'gdp':americas_gdp,'year':current_year, 'life_expectancy':americas_life/americas_total});
+          agg_data.push({ 'continent':'Oceania', 'name':'Oceania','population':oceania_population,'gdp':oceania_gdp,'year':current_year, 'life_expectancy':oceania_life/oceania_total});                                        
+          filter_data = agg_data;
+        }
+
+        // filter by continent
+        countries  = Array();
+        new_data   = Array();
+
+        d3.selectAll("input").each(function(d) { 
+        if (d3.select(this).attr("type") == "checkbox" && d3.select(this).node().checked) {
+            // Current name of the checkbox is d3.select(this).attr("name")
+            // push to array of checked values
+            countries.push(this.name);
+        }
+        });
+
+        if (countries.length > 0) {
+          for (x = 0; x < filter_data.length; x++) {
+              add_me = false;
+              for(i = 0; i < countries.length; i++) {
+                  if(countries[i] === filter_data[x].continent) {
+                      add_me=true;
+                      break;
+                  }
+              }
+              if (add_me) {
+                  new_data.push(filter_data[x]);
+              }
+          }
+          filter_data = new_data;
+        } 
+
+        // order the data
+        d3.selectAll("input").each(function(d) { 
+          if (d3.select(this).attr("type") == "radio" && d3.select(this).attr("name") == "sort" && d3.select(this).node().checked) {
+            radio_value = d3.select(this).attr("value");
+          }
+        });  
+
+        filter_data.sort(function(a, b) {
+            if (radio_value == 'name') {
+                var x = a.name;
+                var y = b.name;
+            }   
+            else if (radio_value == 'population') {
+                var x = a.population;
+                var y = b.population;
+                return y - x;
+            }   
+            else if (radio_value == 'gdp') {
+                var x = a.gdp;
+                var y = b.gdp;
+                return y - x;
+            }            
+            if(x > y) {
+              return 1;
+            } 
+            else if (x < y) {
+              return -1;
+            } 
+        });
+
+
+        // send the filtered data to the draw function
+        update_svg(filter_data);        
+    }
+
+    function update_svg(data) {
+        d3.select("svg").remove();
+        d3.selectAll("input").each(function(d) { 
+          if (d3.select(this).attr("type") == "radio" && d3.select(this).attr("name") == "dimension" && d3.select(this).node().checked) {
+            radio_value = d3.select(this).attr("value");
+            console.log('rv: ' + radio_value);
+          }
+        });
+
+        // SVG setup
+        var margin = {top: 50, bottom: 10, left:300, right: 40};
+        var width = 1200 - margin.left - margin.right;
+        var height = 2000 - margin.top - margin.bottom;
+     
+        var xScale = d3.scale.linear().range([0, width]);
+        var yScale = d3.scale.ordinal().rangeRoundBands([0, data.length*15], .8, 0);
+     
+        var svg = d3.select("div.container").append("svg")
+                     .attr("width", width+margin.left+margin.right)
+                     .attr("height", height+margin.top+margin.bottom);
+     
+        var g = svg.append("g")
+                    .attr("transform", "translate("+margin.left+","+margin.top+")");
+     
+
+
+
+        if (radio_value == "population") {
+            var max = d3.max(data, function(d) { return d.population; } );
+        }
+        else {
+            var max = d3.max(data, function(d) { return d.gdp; } );
+        }
+ 
+        //var max = d3.max(data, function(d) { return d.population; } );
+        var min = 0;
+
+        xScale.domain([min, max]);
+        yScale.domain(data.map(function(d) { return d.name; }));
+ 
+        var rows = g.append("g")
+                    .selectAll("g.row")
+                    .data(data)
+                  .enter()
+                    .append("g")
+                    .attr("class", function(d) { return "row-" + d.continent; } );
+
+        if (radio_value == "population") {
+            var bars = rows
+                        .append("rect")
+                        .attr("width", function(d) { return xScale(d.population); })
+                        .attr("height", 10)
+                        .attr("x", xScale(min))
+                        .attr("y", function(d) { return yScale(d.name); } );
+
+        }
+        else {
+            var bars = rows
+                        .append("rect")
+                        .attr("width", function(d) { return xScale(d.gdp); })
+                        .attr("height", 10)
+                        .attr("x", xScale(min))
+                        .attr("y", function(d) { return yScale(d.name); } );
+        }
+        
+        var text = rows
+                    .append("text")
+                    .attr("x", -120)
+                    .attr("y", function(d) { return yScale(d.name) + 9; })
+                    .attr("font-size", "10px")
+                    .attr("font-family", "sans-serif")
+                    .text(function (d) { return d.name; }); 
+        
+    }
+  </script>
+
+
+
+</body>
+</html>

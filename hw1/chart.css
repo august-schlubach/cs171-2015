@@ -1,0 +1,39 @@
+div.container {
+    width:98%; 
+    margin:1%;
+}
+div.filter-container{
+	width:100%;
+}
+div.filters{
+    margin-left: 100px;
+    margin-right: auto;
+    margin-top: 50px;
+    width: 910px;
+}
+caption {
+	font-size:28px;
+	font-family:Helvetica;
+	font-weight:bold;
+	padding: 21px;
+}
+.row-Africa rect {
+    fill:orange;
+    fill-opacity:.8;
+}
+.row-Europe rect {
+    fill:blue;
+    fill-opacity:.8;
+}
+.row-Americas rect {
+    fill:green;
+    fill-opacity:.8;
+}
+.row-Asia rect {
+    fill:red;
+    fill-opacity:.8;
+}
+.row-Oceania rect {
+    fill:brown;
+    fill-opacity:.8;
+}
