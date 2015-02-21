@@ -293,15 +293,15 @@
     <div class="filter-container">
       <div class="filters">
       Filter by: 
-        <label>Africa<input type="checkbox" name="Africa" value="Africa" title="Africa" onchange="filter(this);"></input></label>
-        <label>Americas<input type="checkbox" name="Americas" value="Americas" title="Americas" onchange="filter(this);"></input></label>
-        <label>Asia<input type="checkbox" name="Asia" value="Asia" title="Asia" onchange="filter(this);"></input></label>
-        <label>Europe<input type="checkbox" name="Europe" value="Europe" title="Europe" onchange="filter(this);"></input></label>
-        <label>Oceania<input type="checkbox" name="Oceania" value="Oceania" title="Oceania" onchange="filter(this);"></input></label>  
+        <label>Africa    <input type="checkbox" name="Africa"   value="Africa"   title="Africa"   onchange="filter(this);"></input></label>
+        <label>Americas  <input type="checkbox" name="Americas" value="Americas" title="Americas" onchange="filter(this);"></input></label>
+        <label>Asia      <input type="checkbox" name="Asia"     value="Asia"     title="Asia"     onchange="filter(this);"></input></label>
+        <label>Europe    <input type="checkbox" name="Europe"   value="Europe"   title="Europe"   onchange="filter(this);"></input></label>
+        <label>Oceania   <input type="checkbox" name="Oceania"  value="Oceania"  title="Oceania"  onchange="filter(this);"></input></label>  
         <br/>
       Aggregation:
-        <label>None<input type="radio" name="aggregation" value="none" checked="checked" onclick="filter(this);"></label>
-        <label>Continent<input type="radio" name="aggregation" value="continent" onclick="filter(this);"></label>   
+        <label>None      <input type="radio" name="aggregation" value="none"      onclick="filter(this);" checked="checked"></label>
+        <label>Continent <input type="radio" name="aggregation" value="continent" onclick="filter(this);"></label>   
         <br/>
         Time update: <span id="min_year"></span><input type="range" name="points" min="1995" max="2012" step="1" value="0" id="slider-time" oninput="filter(this.value);"> <span id="max_year"></span>          
       </div>
