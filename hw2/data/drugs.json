@@ -1,0 +1,25 @@
+{
+   "name": "Trials",
+   "children": [
+    {
+      "name": "CTLA-4",
+        "children": [
+         { "name": "BMS", "drug": "IPILIMUMAB", "size": 228 },
+         { "name": "AZ", "drug": "TREMELIMUMAB", "size" : 60 }
+        ],
+      "name" : 
+      ]
+    },
+    {
+      "name": "PD-1",
+        "children": [
+         { "name": "BMS", "drug": "NIVOLUMAB", "size": 119 },
+         { "name": "Merck", "drug": "PEMBROLIZUMAB", "size" : 96 },
+         { "name": "Medivation", "drug": "PIDILIZUMAB", "size" : 25 },        
+         { "name": "AZ", "drug": "MEDI-0680", "size" : 2 }                  
+        ],
+      "name" : 
+      ]      
+    }
+}
+

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+    </div>
+
+  <script type="text/javascript">
+
+
+    // load data
+    var raw_data     = new Array();
+    var years        = new Array();
+    var current_data = new Array();
+
+    d3.json("data/countries_1995_2012.json", function(error, data){
+
+
+        // transform the data into a flat format that we can more easily use
+        for (i in data) {
+          for (y in data[i].years) {
+              // create a new record: name, continent, 
+              // gdp, life_expectancy, population, year
+              var record = {
+                            'name'            : data[i].name,
+                            'continent'       : data[i].continent,
+                            'gdp'             : data[i].years[y].gdp,
+                            'life_expectancy' : data[i].years[y].life_expectancy,
+                            'population'      : data[i].years[y].population,
+                            'year'            : data[i].years[y].year
+                           };
+              raw_data.push(record);
+
+              // push years into an array to determin min/max
+              years.push(data[i].years[y].year);
+
+              // create an array of initial data by year (1995 to start)
+              if (data[i].years[y].year == '2012') {
+                current_data.push(record);
+              }
+          }
+        }
+
+        update_svg(current_data);
+    });
+
+
+    function update_svg(data) {
+        d3.select("svg").remove();
+
+        data.sort(function(a, b) {
+                var x = a.population;
+                var y = b.population;
+                return y - x;
+        });
+
+        // SVG setup
+        var margin = {top: 50, bottom: 10, left:300, right: 40};
+        var width = 1200 - margin.left - margin.right;
+        var height = 2000 - margin.top - margin.bottom;
+     
+        var xScale = d3.scale.linear().range([0, width]);
+        var yScale = d3.scale.ordinal().rangeRoundBands([0, data.length*15], .8, 0);
+     
+        var svg = d3.select("div.container").append("svg")
+                     .attr("width", width+margin.left+margin.right)
+                     .attr("height", height+margin.top+margin.bottom);
+     
+        var g = svg.append("g")
+                    .attr("transform", "translate("+margin.left+","+margin.top+")");
+     
+
+ 
+        var max = d3.max(data, function(d) { return d.length; } );
+        var min = 0;
+
+        xScale.domain([min, max]);
+        yScale.domain(data.map(function(d) { return d.name; }));
+ 
+        var rows = g.append("g")
+                    .selectAll("g.row")
+                    .data(data)
+                  .enter()
+                    .append("g")
+                    .attr("class", function(d) { return "row-" + d.continent; } );
+
+
+        var bars = rows
+                    .append("circle")
+                    .style("stroke", "black")
+                    .style("fill", "white")                    
+                    .attr("r", 4)
+                    .attr("cx", xScale(min))
+                    .attr("cy", function(d) { return yScale(d.name); } );
+        
+        
+          var text = rows
+                      .append("text")
+                      .attr("x", 20)
+                      .attr("y", function(d) { return yScale(d.name) + 4; })
+                      .attr("font-size", "10px")
+                      .attr("font-family", "sans-serif")
+                      .text(function (d) { return d.name; }); 
+        
+    }
+  </script>
+
+
+
+</body>
+</html>
