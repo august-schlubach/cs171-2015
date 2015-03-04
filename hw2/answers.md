@@ -27,3 +27,5 @@ Independent
 * value
 
 The dependency on connection occurs because the changing the value of either connected node could change the value of the connection.
+
+1.1 Ordinal scale produces a clear readout of names but provides no sense of the difference between individual data points. Linear scale gives a clear sense of the relative difference between data points but can be hard to read (in this configuration at least) when data are clustered.
