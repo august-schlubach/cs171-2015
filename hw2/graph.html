@@ -7,6 +7,21 @@
 </head>
 <body>
 
+    <div class="filter-container">
+      <div class="filters">
+      Spacing:
+        <label>Equal  <input type="radio" name="scale" value="equal"  onclick="filter(this);" checked="checked"></label>
+        <label>Linear <input type="radio" name="scale" value="linear" onclick="filter(this);"></label>   
+        <br/>  
+      Filter:
+        <select id="dimension" onchange="filter(this)">
+          <option value="population">population</option>
+          <option value="gdp">gdp</option>
+          <option value="life_expectancy">life expectancy</option>   
+        </select>  
+      </div>
+    </div>
+
     <div class="container">
     </div>
 
@@ -50,8 +65,130 @@
     });
 
 
+    function filter(x) {
+      // get filter values from form elements
+      // :: scale
+      var dimension_value = "";
+      d3.selectAll("input").each(function(d) { 
+        if (d3.select(this).attr("type") == "radio" && d3.select(this).attr("name") == "scale" && d3.select(this).node().checked) {
+          radio_value = d3.select(this).attr("value");
+        }
+      });
+
+      // :: dimension
+      dimension_value = d3.select("#dimension").node().value; 
+      if (radio_value == 'linear') {
+
+        // set domain and range for linear transformation   
+        if (dimension_value == 'population') {              
+          max = d3.max(current_data, function(d) { return d.population; });
+          min = d3.min(current_data, function(d) { return d.population; });    
+        }
+        else if (dimension_value == 'gdp') {
+          max = d3.max(current_data, function(d) { return d.gdp; });
+          min = d3.min(current_data, function(d) { return d.gdp; }); 
+        } 
+        else if (dimension_value == 'life_expectancy') {
+          max = d3.max(current_data, function(d) { /* console.log('sanity: ' + d.life_expectancy); */ return d.life_expectancy; });
+          min = d3.min(current_data, function(d) { return d.life_expectancy; });           
+        } 
+        var yScale = d3.scale.linear();
+        yScale.domain([max, min]);
+        yScale.range([10, 1800]);
+
+        if (dimension_value == 'population') {   
+          d3.selectAll("circle")
+            .each(function(d) {
+              d3.select(this)
+                .transition()
+                .attr('cy', d3.round(yScale(d.population)- 4));
+            });
+
+          d3.selectAll("text")
+            .each(function(d) {
+              d3.select(this)
+                .transition()
+                .attr('y', d3.round(yScale(d.population)));
+            });
+        }
+        else if (dimension_value=='gdp') {
+          d3.selectAll("circle")
+            .each(function(d) {
+              d3.select(this)
+                .transition()
+                .attr('cy', d3.round(yScale(d.gdp)- 4));
+            });
+
+          d3.selectAll("text")
+            .each(function(d) {
+              d3.select(this)
+                .transition()
+                .attr('y', d3.round(yScale(d.gdp)));
+            });
+        }  
+        else if (dimension_value=='life_expectancy') {
+          d3.selectAll("circle")
+            .each(function(d) {
+              d3.select(this)
+                .transition()
+                .attr('cy', d3.round(yScale(d.life_expectancy)- 4));
+            });
+
+          d3.selectAll("text")
+            .each(function(d) {
+              d3.select(this)
+                .transition()
+                .attr('y', d3.round(yScale(d.life_expectancy)));
+            });
+        }  
+
+      }
+      else if (radio_value == 'equal') {
+        // set domain and range for ordinal transformation
+        var yScale = d3.scale.ordinal().rangeRoundBands([0, current_data.length*15], .8, 0); 
+
+        sorted_data = current_data;
+        if (dimension_value == 'population') {
+           sorted_data.sort(function(a, b) {
+                  var x = a.population;
+                  var y = b.population;
+                  return y - x;
+           });
+        }
+        else if (dimension_value == 'gdp') {
+           sorted_data.sort(function(a, b) {
+                  var x = a.gdp;
+                  var y = b.gdp;
+                  return y - x;
+           });
+        }
+        else if (dimension_value == 'life_expectancy') {
+           sorted_data.sort(function(a, b) {
+                  var x = a.life_expectancy;
+                  var y = b.life_expectancy;
+                  return y - x;
+           });
+        }        
+        yScale.domain(sorted_data.map(function(d) { return d.name; }));
+
+        d3.selectAll("circle")
+          .each(function(d) {
+            d3.select(this)
+              .transition()
+              .attr('cy', yScale(d.name));
+          });
+
+        d3.selectAll("text")
+          .each(function(d) {
+            d3.select(this)
+              .transition()
+              .attr('y', yScale(d.name) + 4);
+          });          
+      }
+    }
+
     function update_svg(data) {
-        d3.select("svg").remove();
+        //d3.select("svg").remove();
 
         data.sort(function(a, b) {
                 var x = a.population;
@@ -61,7 +198,7 @@
 
         // SVG setup
         var margin = {top: 50, bottom: 10, left:300, right: 40};
-        var width = 1200 - margin.left - margin.right;
+        var width  = 1200 - margin.left - margin.right;
         var height = 2000 - margin.top - margin.bottom;
      
         var xScale = d3.scale.linear().range([0, width]);
@@ -87,15 +224,15 @@
                     .data(data)
                   .enter()
                     .append("g")
-                    .attr("class", function(d) { return "row-" + d.continent; } );
+                    .attr("class", 'row' );
 
 
-        var bars = rows
+        var circle = rows
                     .append("circle")
                     .style("stroke", "black")
                     .style("fill", "white")                    
                     .attr("r", 4)
-                    .attr("cx", xScale(min))
+                    .attr("cx", 0)
                     .attr("cy", function(d) { return yScale(d.name); } );
         
         
