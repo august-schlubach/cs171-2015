@@ -8,17 +8,27 @@
 <body>
 
     <div class="filter-container">
-      <div class="filters">
-      Spacing:
-        <label>Equal  <input type="radio" name="scale" value="equal"  onclick="filter(this);" checked="checked"></label>
-        <label>Linear <input type="radio" name="scale" value="linear" onclick="filter(this);"></label>   
-        <br/>  
-      Filter:
-        <select id="dimension" onchange="filter(this)">
-          <option value="population">population</option>
-          <option value="gdp">gdp</option>
-          <option value="life_expectancy">life expectancy</option>   
-        </select>  
+      <div id="layout-filters">
+        Layout:
+        <label>Range  <input type="radio" name="layout" value="range"  onclick="filter(this);" checked="checked"></label>
+        <label>Scatterplot <input type="radio" name="layout" value="scatterplot" onclick="filter(this);"></label>   
+        <br/>          
+      </div>
+      <div id="range-filters">
+        Spacing:
+          <label>Equal  <input type="radio" name="scale" value="equal"  onclick="filter(this);" checked="checked"></label>
+          <label>Linear <input type="radio" name="scale" value="linear" onclick="filter(this);"></label>   
+          <br/>  
+        Filter:
+          <select id="dimension" onchange="filter(this)">
+            <option value="population">population</option>
+            <option value="gdp">gdp</option>
+            <option value="life_expectancy">life expectancy</option>   
+          </select>  
+      </div>
+      <div id="scatterplot-filters">
+        <label>Population/GDP  <input type="radio" name="plot" value="pop"  onclick="filter(this);" checked="checked"></label>
+        <label>Lat/Long <input type="radio" name="plot" value="lat" onclick="filter(this);"></label>           
       </div>
     </div>
 
@@ -43,6 +53,8 @@
               // gdp, life_expectancy, population, year
               var record = {
                             'name'            : data[i].name,
+                            'latitude'        : data[i].latitude,
+                            'longitude'       : data[i].longitude,                                                        
                             'continent'       : data[i].continent,
                             'gdp'             : data[i].years[y].gdp,
                             'life_expectancy' : data[i].years[y].life_expectancy,
@@ -66,9 +78,114 @@
 
 
     function filter(x) {
+
+      d3.selectAll("input").each(function(d) { 
+        if (d3.select(this).attr("type") == "radio" && d3.select(this).attr("name") == "layout" && d3.select(this).node().checked) {
+          layout_value = d3.select(this).attr("value");
+        }
+      });
+      console.log('layout_value: ' + layout_value);
+      var r = document.getElementById('range-filters');
+      var s = document.getElementById('scatterplot-filters');  
+
+      if (layout_value == 'range') {
+        r.style.display = 'inline'; 
+        s.style.display = 'none';
+        range();
+      }
+      else if (layout_value == 'scatterplot') {
+        r.style.display = 'none'; 
+        s.style.display = 'inline';
+        scatter();
+      }
+
+    }
+
+    function scatter() {
       // get filter values from form elements
       // :: scale
-      var dimension_value = "";
+
+      var plot_value = "";
+      d3.selectAll("input").each(function(d) { 
+        if (d3.select(this).attr("type") == "radio" && d3.select(this).attr("name") == "plot" && d3.select(this).node().checked) {
+          plot_value = d3.select(this).attr("value");
+        }
+      });
+
+      if (plot_value == 'pop') {
+             
+        y_max = d3.max(current_data, function(d) { return d.population; });
+        y_min = d3.min(current_data, function(d) { return d.population; });    
+
+        x_max = d3.max(current_data, function(d) { return d.gdp; });
+        x_min = d3.min(current_data, function(d) { return d.gdp; });            
+
+
+        var yScale = d3.scale.linear();
+        yScale.domain([y_max, y_min]);
+        yScale.range([10, 1800]);
+
+        var xScale = d3.scale.linear();
+        xScale.domain([x_min, x_max]);
+        xScale.range([10, 2000]);
+
+   
+          d3.selectAll("circle")
+            .each(function(d) {
+              d3.select(this)
+                .transition()
+                .attr('cy', d3.round(yScale(d.population)- 4))
+                .attr('cx', d3.round(xScale(d.gdp)));
+            });
+
+          d3.selectAll("text")
+            .each(function(d) {
+              d3.select(this)
+                .transition()
+                .attr('y', d3.round(yScale(d.population)))
+                .attr('x', d3.round(xScale(d.gdp) + 10));
+            });
+      }
+      else if (plot_value == 'lat') {
+             
+          y_max = d3.max(current_data, function(d) { return d.latitude; });
+          y_min = d3.min(current_data, function(d) { return d.latitude; });    
+
+          x_max = d3.max(current_data, function(d) { return d.longitude; });
+          x_min = d3.min(current_data, function(d) { return d.longitude; });            
+
+
+        var yScale = d3.scale.linear();
+        yScale.domain([y_max, y_min]);
+        yScale.range([10, 1800]);
+
+        var xScale = d3.scale.linear();
+        xScale.domain([x_min, x_max]);
+        xScale.range([10, 2000]);
+
+  
+          d3.selectAll("circle")
+            .each(function(d) {
+              d3.select(this)
+                .transition()
+                .attr('cy', d3.round(yScale(d.latitude)- 4))
+                .attr('cx', d3.round(xScale(d.longitude)));
+            });
+
+          d3.selectAll("text")
+            .each(function(d) {
+              d3.select(this)
+                .transition()
+                .attr('y', d3.round(yScale(d.latitude)))
+                .attr('x', d3.round(xScale(d.longitude) + 10));
+            });          
+      }    
+    }
+
+    function range() {
+      // get filter values from form elements
+      // :: scale
+
       d3.selectAll("input").each(function(d) { 
         if (d3.select(this).attr("type") == "radio" && d3.select(this).attr("name") == "scale" && d3.select(this).node().checked) {
           radio_value = d3.select(this).attr("value");
@@ -101,6 +218,7 @@
             .each(function(d) {
               d3.select(this)
                 .transition()
+                .attr('cx', 0)
                 .attr('cy', d3.round(yScale(d.population)- 4));
             });
 
@@ -108,6 +226,7 @@
             .each(function(d) {
               d3.select(this)
                 .transition()
+                .attr('x', 20)                
                 .attr('y', d3.round(yScale(d.population)));
             });
         }
@@ -116,6 +235,7 @@
             .each(function(d) {
               d3.select(this)
                 .transition()
+                .attr('cx', 0)
                 .attr('cy', d3.round(yScale(d.gdp)- 4));
             });
 
@@ -123,6 +243,7 @@
             .each(function(d) {
               d3.select(this)
                 .transition()
+                .attr('x', 20)
                 .attr('y', d3.round(yScale(d.gdp)));
             });
         }  
@@ -131,6 +252,7 @@
             .each(function(d) {
               d3.select(this)
                 .transition()
+                .attr('cx', 0)
                 .attr('cy', d3.round(yScale(d.life_expectancy)- 4));
             });
 
@@ -138,6 +260,7 @@
             .each(function(d) {
               d3.select(this)
                 .transition()
+                .attr('x', 20)
                 .attr('y', d3.round(yScale(d.life_expectancy)));
             });
         }  
@@ -175,6 +298,7 @@
           .each(function(d) {
             d3.select(this)
               .transition()
+              .attr('cx', 0)
               .attr('cy', yScale(d.name));
           });
 
@@ -182,6 +306,7 @@
           .each(function(d) {
             d3.select(this)
               .transition()
+              .attr('x', 20)
               .attr('y', yScale(d.name) + 4);
           });          
       }
@@ -198,7 +323,7 @@
 
         // SVG setup
         var margin = {top: 50, bottom: 10, left:300, right: 40};
-        var width  = 1200 - margin.left - margin.right;
+        var width  = 2500 - margin.left - margin.right;
         var height = 2000 - margin.top - margin.bottom;
      
         var xScale = d3.scale.linear().range([0, width]);
