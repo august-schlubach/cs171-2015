@@ -6,12 +6,31 @@
 <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
+<style>
+  .link {
+    stroke: gray;
+    stroke-width: .8px;
+  }
+
+  .node {
+    fill: white;
+    stroke: #000;
+    stroke-width: .9px;
+  }
+
+  .node:hover {
+    fill: black;
+  }
+
+</style>  
 
     <div class="filter-container">
       <div id="layout-filters">
         Layout:
         <label>Range  <input type="radio" name="layout" value="range"  onclick="filter(this);" checked="checked"></label>
         <label>Scatterplot <input type="radio" name="layout" value="scatterplot" onclick="filter(this);"></label>   
+        <label>Donut <input type="radio" name="layout" value="donut" onclick="filter(this);"></label>           
+        <label>Circle <input type="radio" name="layout" value="circle" onclick="filter(this);"></label>                   
         <br/>          
       </div>
       <div id="range-filters">
@@ -30,6 +49,10 @@
         <label>Population/GDP  <input type="radio" name="plot" value="pop"  onclick="filter(this);" checked="checked"></label>
         <label>Lat/Long <input type="radio" name="plot" value="lat" onclick="filter(this);"></label>           
       </div>
+      <div id="circle-filters">
+        <label>Population <input type="radio" name="circle" value="pop"  onclick="filter(this);" checked="checked"></label>
+        <label>GDP <input type="radio" name="circle" value="gdp" onclick="filter(this);"></label>  
+      </div>
     </div>
 
     <div class="container">
@@ -37,11 +60,19 @@
 
   <script type="text/javascript">
 
-
     // load data
     var raw_data     = new Array();
     var years        = new Array();
     var current_data = new Array();
+
+    // SVG setup
+    var margin = {top: 50, bottom: 10, left:300, right: 40};
+    var width  = 2500 - margin.left - margin.right;
+    var height = 2000 - margin.top - margin.bottom;    
+
+    var svg = d3.select("div.container").append("svg")
+                 .attr("width", width+margin.left+margin.right)
+                 .attr("height", height+margin.top+margin.bottom);
 
     d3.json("data/countries_1995_2012.json", function(error, data){
 
@@ -76,7 +107,6 @@
         update_svg(current_data);
     });
 
-
     function filter(x) {
 
       d3.selectAll("input").each(function(d) { 
@@ -84,26 +114,205 @@
           layout_value = d3.select(this).attr("value");
         }
       });
-      console.log('layout_value: ' + layout_value);
       var r = document.getElementById('range-filters');
       var s = document.getElementById('scatterplot-filters');  
+      var c = document.getElementById('circle-filters');        
 
       if (layout_value == 'range') {
         r.style.display = 'inline'; 
         s.style.display = 'none';
+        c.style.display = 'none';        
         range();
       }
       else if (layout_value == 'scatterplot') {
         r.style.display = 'none'; 
         s.style.display = 'inline';
+        c.style.display = 'none';                
         scatter();
       }
-
+      else if (layout_value == 'donut') {
+        r.style.display = 'none'; 
+        s.style.display = 'none';   
+        c.style.display = 'inline';
+        donut();             
+      }
+      else if (layout_value == 'circle') {
+        r.style.display = 'none'; 
+        s.style.display = 'none';   
+        c.style.display = 'inline';
+        circle();             
+      }
     }
+
+    function circle() {
+
+      d3.selectAll("input").each(function(d) { 
+        if (d3.select(this).attr("type") == "radio" && d3.select(this).attr("name") == "circle" && d3.select(this).node().checked) {
+          circle_value = d3.select(this).attr("value");
+        }
+      });
+
+      // get rid of old arc elements
+      svg.selectAll('g.arc').remove();
+      svg.selectAll(".node").remove();
+      
+      // hide circles and text from manual layouts
+      d3.selectAll("circle")
+        .each(function(d) {
+          d3.select(this)
+            .attr('cx', -1000)
+            .attr('cy', -1000);
+        });
+
+      d3.selectAll("text")
+        .each(function(d) {
+          d3.select(this)
+            .attr('x', -1000)                
+            .attr('y', -1000);
+        });
+
+      var graph = {nodes: [], population: [], gdp: []};
+      var nb_nodes = 119, nb_cat = 2;
+
+      graph.nodes = d3.range(nb_nodes).map(function(d, i) {  
+        return { 
+          pop: current_data[i].population,
+          gdp: current_data[i].gdp
+        }; 
+      })
+
+      var node_scale = d3.scale.linear().domain([0, 10]).range([5, 50])
+
+      var node = svg.selectAll(".node")
+                    .data(graph.nodes)
+                  .enter()
+                    .append("g").attr("class", "node");
+
+
+      node.append("circle")
+          .attr("r", 5)
+
+      node.append("text")
+          .attr('x', function(d, i) { return 10; })
+          .attr('y', function(d, i) { return 5; })          
+          .text(function(d, i) { return current_data[i].name; });
+
+      var r = Math.min(height, width/1.5); // /2
+
+      var arc = d3.svg.arc()
+              .outerRadius(r);
+
+      if (circle_value == 'pop') {
+      var pie = d3.layout.pie()
+              .sort(function(a, b) { return b.pop - a.pop;}) 
+              .value(function(d, i) { 
+                return 1;  
+              });
+      }
+      else if (circle_value == 'gdp') {
+      var pie = d3.layout.pie()
+              .sort(function(a, b) { return b.gdp - a.gdp;}) 
+              .value(function(d, i) { 
+                return 1;  
+              });
+      }
+
+      graph.nodes = pie(graph.nodes).map(function(d, i) {
+        d.innerRadius = 0;
+        d.outerRadius = r;
+
+        d.data.x = arc.centroid(d)[0]+width/2;
+        d.data.y = arc.centroid(d)[1]+height/2;
+        return d.data;
+      })
+
+
+      node.transition().duration(500)
+          .attr("transform", function(d) { 
+            return "translate("+d.x+","+d.y+")"; 
+          });
+    }
+
+    function donut() {
+
+      // get rid of old  elements
+      svg.selectAll('g.arc').remove();
+      svg.selectAll(".node").remove();
+
+      d3.selectAll("input").each(function(d) { 
+        if (d3.select(this).attr("type") == "radio" && d3.select(this).attr("name") == "circle" && d3.select(this).node().checked) {
+          circle_value = d3.select(this).attr("value");
+        }
+      });
+
+      // hide circles and text from manual layouts
+      d3.selectAll("circle")
+        .each(function(d) {
+          d3.select(this)
+            .attr('cx', -1000)
+            .attr('cy', -1000);
+        });
+
+      d3.selectAll("text")
+        .each(function(d) {
+          d3.select(this)
+            .attr('x', -1000)                
+            .attr('y', -1000);
+        });
+
+      pop_circle_data = new Array();
+      c_array         = new Array();
+      current_data.forEach(mapArrayElements); // populate data arrays
+
+      var pie = d3.layout.pie();
+      pie(c_array); // this is just an array of pop numbers sent to pie
+
+      var color = d3.scale.category10();
+      var outerRadius = width/4;
+      var innerRadius = (width/4)-100;
+      var arc = d3.svg.arc()
+                      .innerRadius(innerRadius)
+                      .outerRadius(outerRadius);
+
+      var arcs = svg.selectAll('g.arc')
+        .data(pie(c_array.map(function(d,i) { 
+          if (circle_value == 'pop') {
+            return c_array[i].pop; 
+          }
+          else if (circle_value == 'gdp') {
+            return c_array[i].gdp; 
+          }
+        })))
+        .sort()        
+        .enter()
+        .append('g')
+        .attr('class', 'arc')
+        .attr('transform', 'translate(' + (outerRadius + 100) + ", " + (outerRadius + 100) + ")");
+
+
+      arcs.append('path')
+          .attr('fill', function(d, i) { return color(i);})
+          .attr('d', arc);
+
+      arcs.append("circle")
+          .attr("transform", function(d) {
+            return "translate(" + arc.centroid(d) + ")";
+          })            
+
+      arcs.append("text")
+          .attr("transform", function(d) {
+            return "translate(" + arc.centroid(d) + ")";
+          })
+          .attr('text-anchor', 'middle')
+          .text(function(d, i) { return c_array[i].name; });
+    }
+
 
     function scatter() {
       // get filter values from form elements
       // :: scale
+      svg.selectAll('g.arc').remove();
+      svg.selectAll(".node").remove();
 
       var plot_value = "";
       d3.selectAll("input").each(function(d) { 
@@ -185,6 +394,9 @@
     function range() {
       // get filter values from form elements
       // :: scale
+
+      svg.selectAll('g.arc').remove();
+      svg.selectAll(".node").remove();
 
       d3.selectAll("input").each(function(d) { 
         if (d3.select(this).attr("type") == "radio" && d3.select(this).attr("name") == "scale" && d3.select(this).node().checked) {
@@ -320,18 +532,11 @@
                 var y = b.population;
                 return y - x;
         });
-
-        // SVG setup
-        var margin = {top: 50, bottom: 10, left:300, right: 40};
-        var width  = 2500 - margin.left - margin.right;
-        var height = 2000 - margin.top - margin.bottom;
      
         var xScale = d3.scale.linear().range([0, width]);
         var yScale = d3.scale.ordinal().rangeRoundBands([0, data.length*15], .8, 0);
      
-        var svg = d3.select("div.container").append("svg")
-                     .attr("width", width+margin.left+margin.right)
-                     .attr("height", height+margin.top+margin.bottom);
+
      
         var g = svg.append("g")
                     .attr("transform", "translate("+margin.left+","+margin.top+")");
@@ -369,6 +574,12 @@
                       .attr("font-family", "sans-serif")
                       .text(function (d) { return d.name; }); 
         
+    }
+
+    function mapArrayElements(element, index, array) {
+       pop_circle_data.push(element.population);
+       a = { 'pop' : element.population, 'gdp' : element.gdp, 'name' : element.name };
+       c_array.push(a);
     }
   </script>
 

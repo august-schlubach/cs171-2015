@@ -1,3 +1,18 @@
 div#scatterplot-filters {
 	display: none;
 }
+div#circle-filters {
+	display: none;
+}
+.link {
+stroke: #ddd;
+stroke-width: .8px;
+}
+.node {
+fill: white;
+stroke: #000;
+stroke-width: .9px;
+}
+.node:hover {
+fill: black;
+}
