@@ -32,7 +32,5 @@ The dependency on connection occurs because the changing the value of either con
 
 1.2 Because scatterplots are created using cartesian coordinates, quantitative data is the appropriate input. Ordinal data, for example, would be difficult to plot without assigning aribrary quantitative values (small=1, medium=2, etc.).
 
-2.1 The advantage of layouts is that they provide methods for quickly performing standard visualization tasks such as pie charts, historgrams, trees, etc.
-
-downside is that you are constrained by the limitations of the layout and forced into using its methods even if they don't naturally fit your needs.
+2.1 The advantage of layouts is that they provide methods for quickly performing standard visualization tasks such as pie charts, historgrams, trees, etc. The downside is that you are constrained by the limitations of the layout and forced into using its methods even if they don't naturally fit your needs.
 
