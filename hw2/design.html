@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+   <div class="container">
+   </div>
+
+  <script type="text/javascript">
+	var current_data = new Array();
+	var raw_data     = new Array();
+    var years        = new Array();
+
+    // SVG setup
+    var margin = {top: 50, bottom: 10, left:300, right: 40};
+    var width  = 2500 - margin.left - margin.right;
+    var height = 2000 - margin.top - margin.bottom;    
+
+    var svg = d3.select("div.container").append("svg")
+                 .attr("width", width+margin.left+margin.right)
+                 .attr("height", height+margin.top+margin.bottom);
+
+    d3.json("data/countries_1995_2012.json", function(error, data){
+
+
+        // transform the data into a flat format that we can more easily use
+        for (i in data) {
+          for (y in data[i].years) {
+              // create a new record: name, continent, 
+              // gdp, life_expectancy, population, year
+
+              var t_array = data[i].years[y].top_partners;
+              var p_array = [];
+              for (z=0; z < t_array.length; z++) {
+                p_array.push(t_array[z].country_id);
+              }
+
+              var record = {
+                            'name'            : data[i].name,
+                            'latitude'        : data[i].latitude,
+                            'longitude'       : data[i].longitude,                                                        
+                            'continent'       : data[i].continent,
+                            'country_id'      : data[i].country_id,                    
+                            'gdp'             : data[i].years[y].gdp,
+                            'life_expectancy' : data[i].years[y].life_expectancy,
+                            'population'      : data[i].years[y].population,
+                            'year'            : data[i].years[y].year,
+                            'trade'           : p_array
+                           };
+              raw_data.push(record);
+
+              // push years into an array to determin min/max
+              years.push(data[i].years[y].year);
+
+              // create an array of initial data by year (1995 to start)
+              if (data[i].years[y].year == '2012') {
+                current_data.push(record);
+              }
+          }
+        }
+    });
+
+    var g = svg.append("g")
+                .attr("transform", "translate("+margin.left+","+margin.top+")");
+                
+    var rows = g.append("g")
+                .selectAll("g.row")
+                .data(current_data)
+              .enter()
+                .append("g")
+                .attr("class", 'row' );
+
+
+    var circle = rows
+                .append("circle")
+                .style("stroke", "black")
+                .style("fill", "white")                    
+                .attr("r", 4)
+                .attr("cx", 0)
+                .attr("cy", function(d) { return yScale(d.name); } );
+    
+    
+      var text = rows
+                  .append("text")
+                  .attr("x", 20)
+                  .attr("y", function(d) { return yScale(d.name) + 4; })
+                  .attr("font-size", "10px")
+                  .attr("font-family", "sans-serif")
+                  .text(function (d) { return d.name; });         
+    
+
+	y_max = d3.max(current_data, function(d) { return d.latitude; });
+	y_min = d3.min(current_data, function(d) { return d.latitude; });    
+
+	x_max = d3.max(current_data, function(d) { return d.longitude; });
+	x_min = d3.min(current_data, function(d) { return d.longitude; });            
+
+
+	var yScale = d3.scale.linear();
+	yScale.domain([y_max, y_min]);
+	yScale.range([10, 1800]);
+
+	var xScale = d3.scale.linear();
+	xScale.domain([x_min, x_max]);
+	xScale.range([10, 2000]);
+
+
+	d3.selectAll("circle")
+	.each(function(d) {
+	  d3.select(this)
+	    .transition()
+	    .attr('cy', d3.round(yScale(d.latitude)- 4))
+	    .attr('cx', d3.round(xScale(d.longitude)));
+	});
+
+	d3.selectAll("text")
+	.each(function(d) {
+	  d3.select(this)
+	    .transition()
+	    .attr('y', d3.round(yScale(d.latitude)))
+	    .attr('x', d3.round(xScale(d.longitude) + 10));
+	}); 
+
+ </script>
+
+
+
+</body>
+</html>            
