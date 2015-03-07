@@ -17,5 +17,15 @@ stroke: gray;
 stroke-width: .9px;
 }
 .node:hover {
-fill: black;
+	fill: black;
+}
+.cn
+{
+	fill: black;
+}
+.cn:hover {
+	fill: red;
+}
+.cn-partner {
+	fill: green;
 }

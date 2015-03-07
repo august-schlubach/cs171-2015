@@ -10,8 +10,8 @@
    </div>
 
   <script type="text/javascript">
-	var current_data = new Array();
-	var raw_data     = new Array();
+  	var current_data = new Array();
+  	var raw_data     = new Array();
     var years        = new Array();
 
     // SVG setup
@@ -24,8 +24,6 @@
                  .attr("height", height+margin.top+margin.bottom);
 
     d3.json("data/countries_1995_2012.json", function(error, data){
-
-
         // transform the data into a flat format that we can more easily use
         for (i in data) {
           for (y in data[i].years) {
@@ -61,69 +59,93 @@
               }
           }
         }
+
+        var nodes = [];
+        for (var i = 0, len = current_data.length; i < len; i++) {      
+          nodes.push({ 'continent': current_data[i].continent, 
+                       'name' : current_data[i].name, 
+                       'id' : current_data[i].country_id, 
+                       'trade' : current_data[i].trade });
+        }
+
+        y_max = d3.max(current_data, function(d) { return d.latitude; });
+        y_min = d3.min(current_data, function(d) { return d.latitude; });    
+
+        x_max = d3.max(current_data, function(d) { return d.longitude; });
+        x_min = d3.min(current_data, function(d) { return d.longitude; });            
+
+
+        var yScale = d3.scale.linear();
+        yScale.domain([y_max, y_min]);
+        yScale.range([10, 1500]);
+
+        var xScale = d3.scale.linear();
+        xScale.domain([x_min, x_max]);
+        xScale.range([10, 1800]);
+
+        var g = svg.append("g")
+                    .attr("transform", "translate("+margin.left+","+margin.top+")");
+                    
+        var rows = g.append("g")
+                    .selectAll("g.row")
+                    .data(current_data)
+                  .enter()
+                    .append("g")
+                    .attr("id", function(d,i) { return 'cn-' + d.country_id;})
+                    .attr("class", 'cn' )
+                    .on("mouseover", function(d) { 
+                      console.log('mouse cn-' + d.country_id);
+                      // reset all nodes
+                      d3.selectAll("g").classed('cn-partner', false);
+
+                      for (n=0; n<current_data.length; n++){
+                        if (current_data[n].country_id != d.country_id) continue;
+                        partners = current_data[n].trade;     
+                        for (z=0; z<partners.length; z++) {
+                          console.log('partner node cn-' + partners[z]);
+                          p_class = 'cn-' + partners[z];
+                          d3.select('#' + p_class).classed('cn-partner', true);
+
+                        }
+                      }
+
+
+                    });
+
+
+        var circle = rows
+                    .append("circle")
+                    .style("stroke", "black")
+                    .style("fill", "white")                    
+                    .attr("r", 4)
+                    .attr("cx", 0)
+                    .attr("cy", function(d) { return yScale(d.name); });
+            
+          var text = rows
+                      .append("text")
+                      .attr("x", 20)
+                      .attr("y", function(d) { return yScale(d.name) + 4; })
+                      .attr("font-size", "10px")
+                      .attr("font-family", "sans-serif")
+                      .text(function (d) { return d.name; });         
+        
+
+        	d3.selectAll("circle")
+        	.each(function(d) {
+        	  d3.select(this)
+        	    .transition()
+        	    .attr('cy', d3.round(yScale(d.latitude)- 4))
+        	    .attr('cx', d3.round(xScale(d.longitude)));
+        	});
+
+        	d3.selectAll("text")
+        	.each(function(d) {
+        	  d3.select(this)
+        	    .transition()
+        	    .attr('y', d3.round(yScale(d.latitude)))
+        	    .attr('x', d3.round(xScale(d.longitude) + 10));
+        	}); 
     });
-
-    var g = svg.append("g")
-                .attr("transform", "translate("+margin.left+","+margin.top+")");
-                
-    var rows = g.append("g")
-                .selectAll("g.row")
-                .data(current_data)
-              .enter()
-                .append("g")
-                .attr("class", 'row' );
-
-
-    var circle = rows
-                .append("circle")
-                .style("stroke", "black")
-                .style("fill", "white")                    
-                .attr("r", 4)
-                .attr("cx", 0)
-                .attr("cy", function(d) { return yScale(d.name); } );
-    
-    
-      var text = rows
-                  .append("text")
-                  .attr("x", 20)
-                  .attr("y", function(d) { return yScale(d.name) + 4; })
-                  .attr("font-size", "10px")
-                  .attr("font-family", "sans-serif")
-                  .text(function (d) { return d.name; });         
-    
-
-	y_max = d3.max(current_data, function(d) { return d.latitude; });
-	y_min = d3.min(current_data, function(d) { return d.latitude; });    
-
-	x_max = d3.max(current_data, function(d) { return d.longitude; });
-	x_min = d3.min(current_data, function(d) { return d.longitude; });            
-
-
-	var yScale = d3.scale.linear();
-	yScale.domain([y_max, y_min]);
-	yScale.range([10, 1800]);
-
-	var xScale = d3.scale.linear();
-	xScale.domain([x_min, x_max]);
-	xScale.range([10, 2000]);
-
-
-	d3.selectAll("circle")
-	.each(function(d) {
-	  d3.select(this)
-	    .transition()
-	    .attr('cy', d3.round(yScale(d.latitude)- 4))
-	    .attr('cx', d3.round(xScale(d.longitude)));
-	});
-
-	d3.selectAll("text")
-	.each(function(d) {
-	  d3.select(this)
-	    .transition()
-	    .attr('y', d3.round(yScale(d.latitude)))
-	    .attr('x', d3.round(xScale(d.longitude) + 10));
-	}); 
-
  </script>
 
 
