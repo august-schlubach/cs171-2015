@@ -34,3 +34,8 @@ The dependency on connection occurs because the changing the value of either con
 
 2.1 The advantage of layouts is that they provide methods for quickly performing standard visualization tasks such as pie charts, historgrams, trees, etc. The downside is that you are constrained by the limitations of the layout and forced into using its methods even if they don't naturally fit your needs.
 
+3.1 Other strategies for reducing complexity:
+
+* Use shapes instead of lines to show partners (hover would change partners' shapes to matching shape)
+* Use movement to change the position of the partner pattern to an uncluttered nearby background
+* Change the size of the nodes, growing the selected ones and shrinking the others
