@@ -4,32 +4,16 @@ div#scatterplot-filters {
 div#circle-filters {
 	display: none;
 }
-<<<<<<< Updated upstream
-=======
-<<<<<<< HEAD
 div#donut-filters {
 	display: none;
 }
-=======
->>>>>>> origin/master
->>>>>>> Stashed changes
 .link {
-stroke: #ddd;
+stroke: gray;
 stroke-width: .8px;
 }
 .node {
-<<<<<<< Updated upstream
-fill: white;
-stroke: #000;
-=======
-<<<<<<< HEAD
 fill: gray;
 stroke: gray;
-=======
-fill: white;
-stroke: #000;
->>>>>>> origin/master
->>>>>>> Stashed changes
 stroke-width: .9px;
 }
 .node:hover {
