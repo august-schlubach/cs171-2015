@@ -200,7 +200,8 @@
       var links = [];      
       for (var i = 0, len = current_data.length; i < len; i++) {      
         nodes.push({ 'continent': current_data[i].continent, 
-                     'name' : current_data[i].name, 
+                     'name' : current_data[i].name,
+                     'country_id' : current_data[i].country_id, 
                      'id' : current_data[i].country_id, 
                      'trade' : current_data[i].trade });
       }
@@ -256,17 +257,31 @@
       var node = svg.selectAll(".node")
                     .data(nodes)
                   .enter()
-                    .append("g").attr("class", "node");
+                    .append("g")
+                    .attr("id", function(d,i) { return 'cn-' + d.country_id;})
+                    .attr("class", 'cn' )
+                    .on("mouseover", function(d) { 
+                      // reset all nodes
+                      d3.selectAll("g").classed('cn-partner', false);
+                      d3.selectAll(".partner-line").style("stroke", "rgb(250,250,250)")
 
-      node.append("circle")
-          .attr("r", 5);
+                      for (n=0; n<current_data.length; n++){
+                        if (current_data[n].country_id != d.country_id) continue;
+                        console.log('got data for ' + d.country_id);
+                        d3.selectAll('#partner-line-' + d.country_id).style("stroke", "rgb(0,0,0)");
 
-      node.append("text")
-          .attr('x', function(d, i) { return 10; })
-          .attr('y', function(d, i) { return 5; }) 
-          .attr("font-family", "sans-serif")         
-          .text(function(d, i) { return nodes[i].name; });
+                        partners = current_data[n].trade;     
+                        for (z=0; z<partners.length; z++) {
+                          p_class = 'cn-' + partners[z];
+                          d3.select('#' + p_class).classed('cn-partner', true);
+                          //d3.select('#partner-line-' + partners[z]).classed('partner-line', false);                          
 
+                        }
+                      }
+
+
+
+                    });
 
       for (n=0; n<nodes.length; n++){
         var this_node = nodes[n];
@@ -285,16 +300,28 @@
               var y2 = nodes[y].y;
 
               // draw the line
-              var myLine = svg.append("line")
-                              .attr("x1", x1)
-                              .attr("y1", y1)
-                              .attr("x2", x2)
-                              .attr("y2", y2)
-                              .style("stroke", "rgb(240,240,240)");
+              svg.append("line")
+                  .attr("x1", x1)
+                  .attr("y1", y1)
+                  .attr("x2", x2)
+                  .attr("y2", y2)
+                  .attr('class', 'partner-line')
+                  .attr('id', 'partner-line-' + this_country_id)
+                  .style("stroke", "rgb(250,250,250)");
             }
           }          
         }        
       }
+
+      node.append("circle")
+          .attr("id", function(d,i) { return 'circle-' + d.country_id;})
+          .attr("r", 5);
+
+      node.append("text")
+          .attr('x', function(d, i) { return 10; })
+          .attr('y', function(d, i) { return 5; }) 
+          .attr("font-family", "sans-serif")         
+          .text(function(d, i) { return nodes[i].name; });
 
       node.transition().duration(500)
           .attr("transform", function(d) { 
@@ -588,10 +615,13 @@
     }
 
     function scatter() {
+      clear();
       // get filter values from form elements
       // :: scale
       svg.selectAll('g.arc').remove();
       svg.selectAll(".node").remove();
+      svg.selectAll('.partner-line').remove();
+      svg.selectAll('.cn').remove();      
 
       var plot_value = "";
       d3.selectAll("input").each(function(d) { 
@@ -676,6 +706,8 @@
 
       svg.selectAll('g.arc').remove();
       svg.selectAll(".node").remove();
+      svg.selectAll('.partner-line').remove();
+      svg.selectAll('.cn').remove();      
 
       d3.selectAll("input").each(function(d) { 
         if (d3.select(this).attr("type") == "radio" && d3.select(this).attr("name") == "scale" && d3.select(this).node().checked) {
@@ -866,6 +898,7 @@
       }
 
       // get rid of old elements
+      svg.selectAll('.cn').remove();      
       svg.selectAll('g.arc').remove();
       svg.selectAll(".node").remove();
       svg.selectAll(".node-Asia").remove();      
@@ -873,6 +906,7 @@
       svg.selectAll(".node-Africa").remove();                  
       svg.selectAll(".node-Europe").remove();                        
       svg.selectAll(".node-Oceania").remove();                              
+      svg.selectAll(".partner-line").remove();                                    
       
       // hide circles and text from manual layouts
       d3.selectAll("circle")
