@@ -34,7 +34,7 @@
               var t_array = data[i].years[y].top_partners;
               var p_array = [];
               for (z=0; z < t_array.length; z++) {
-                p_array.push(t_array[z].country_id);
+                p_array.push({ country_id: t_array[z].country_id, total_export: t_array[z].total_export});
               }
 
               var record = {
@@ -101,16 +101,26 @@
 
                       for (n=0; n<current_data.length; n++){
                         if (current_data[n].country_id != d.country_id) continue;
-                        partners = current_data[n].trade;     
+                        partners = current_data[n].trade;  
+
+                        var max = d3.max(partners, function(d) { return d.total_export; });
+                        var min = d3.min(partners, function(d) { return d.total_export; });  
+                        
+                        var scale = d3.scale.linear();
+                        scale.domain([min, max]);
+                        scale.range([.2, 8]);
+
                         for (z=0; z<partners.length; z++) {
-                          p_class = 'cn-' + partners[z];
+                          p_class = 'cn-' + partners[z].country_id;
                           d3.select('#' + p_class).classed('cn-partner', true);
+
+                          console.log('scale for this line is: ' + scale(partners[z].total_export));
 
                           var x1 = parseInt(d3.select('#circle-' + d.country_id).attr('cx'));
                           var y1 = parseInt(d3.select('#circle-' + d.country_id).attr('cy'));                         
 
-                          var x2 = parseInt(d3.select('#circle-' + partners[z]).attr('cx'));
-                          var y2 = parseInt(d3.select('#circle-' + partners[z]).attr('cy'));
+                          var x2 = parseInt(d3.select('#circle-' + partners[z].country_id).attr('cx'));
+                          var y2 = parseInt(d3.select('#circle-' + partners[z].country_id).attr('cy'));
 
                           x1 += 300;
                           x2 += 300;
@@ -122,6 +132,7 @@
                                 .attr("x2", x2)
                                 .attr("y2", y2)
                                 .attr('class', 'partner-line')
+                                .attr('stroke-width', scale(partners[z].total_export))
                                 .style("stroke", "rgb(30,30,30)");
                         }
                       }

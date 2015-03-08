@@ -10,15 +10,16 @@ My intention with the open design is to combine the lat/long diagram and the hov
 
 * mouse over
 * highlight trade partners
+* vary width by total export
 
 # Further Explorations
 
-* changing visual variables such as color or texture depending on volume of trade
+* changing other visual variables such as color or texture depending on volume of trade
 * using SVG world map to highlight country shapes instead of nodes
 
 # Implementation
 
-* start with  lat/long map to prototype visual efficacy
+* start with lat/long map to prototype visual efficacy
 
 <p align="center">
 <img src="img/lines.jpg" width=200/>
