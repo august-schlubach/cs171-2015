@@ -75,7 +75,6 @@
         x_max = d3.max(current_data, function(d) { return d.longitude; });
         x_min = d3.min(current_data, function(d) { return d.longitude; });            
 
-
         var yScale = d3.scale.linear();
         yScale.domain([y_max, y_min]);
         yScale.range([10, 1500]);
@@ -113,8 +112,6 @@
                         for (z=0; z<partners.length; z++) {
                           p_class = 'cn-' + partners[z].country_id;
                           d3.select('#' + p_class).classed('cn-partner', true);
-
-                          console.log('scale for this line is: ' + scale(partners[z].total_export));
 
                           var x1 = parseInt(d3.select('#circle-' + d.country_id).attr('cx'));
                           var y1 = parseInt(d3.select('#circle-' + d.country_id).attr('cy'));                         
@@ -155,8 +152,7 @@
                       .attr("y", function(d) { return yScale(d.name) + 4; })
                       .attr("font-size", "10px")
                       .attr("font-family", "sans-serif")
-                      .text(function (d) { return d.name; });         
-        
+                      .text(function (d) { return d.name; });                 
 
         	d3.selectAll("circle")
         	.each(function(d) {
@@ -175,8 +171,5 @@
         	}); 
     });
  </script>
-
-
-
 </body>
 </html>            

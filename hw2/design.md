@@ -14,6 +14,8 @@ My intention with the open design is to combine the lat/long diagram and the hov
 
 # Further Explorations
 
+* set scale of total_exports to absolute instead of relative for each country to get a sense of out put vis a vis other countries
+* add a tool tip or legend with dynamic export data on mouseover
 * changing other visual variables such as color or texture depending on volume of trade
 * using SVG world map to highlight country shapes instead of nodes
 
