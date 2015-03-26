@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+'<!DOCTYPE html>
 <html>
 <head lang="en">
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <script src="libs/d3/d3.min.js" charset="utf-8"></script>
     <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
     <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
-
+    <script src="http://d3js.org/queue.v1.min.js"></script>
     <script src="http://hs8.de/cs171_tests/tester.js"></script>
 
     <!--Stylesheets-->
@@ -56,9 +56,7 @@
 
         var dateFormatter = d3.time.format("%Y-%m-%d");
 
-
         var aggregateCountsForRange = function(from, to){
-
             var count = 0;
 
             // TODO: TASK 2 B -- count here for the given time range
@@ -66,24 +64,23 @@
             // HINT: javascript Date objects are comparable !!
             // see: http://www.w3schools.com/js/js_date_methods.asp
 
-
-
-
-
-
+            // if date is in range add to count
+            for (d in allData) {
+                dataTime = allData[d].time;
+                if (dataTime >= from && dataTime <= to) {
+                    count += allData[d].count;
+                }
+            }
 
             // after you assigned a value to the count variable
             // this function checks if your count is correct
             // you need an active internet connection for this to work
             cs171Test.checkCount(count);
-
-
         }
 
 
 
-        function allLoaded(perDay,meta){
-
+        function allLoaded(error, perDay, meta){
             metaData = meta;
 
             // this will transform your data in a nicer form
@@ -109,10 +106,10 @@
 
 
         // TODO: TASK 2 A -- implement your data loading here and then call "allLoaded(perDayData, metaData)"
-
-
-
-
+        queue()
+            .defer(d3.json, 'data/perDayData.json') // geojson points
+            .defer(d3.json, 'data/MYWorld_fields.json') // topojson polygons
+            .await(allLoaded);
 
 
 
