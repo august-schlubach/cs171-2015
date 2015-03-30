@@ -28,11 +28,12 @@ CountVis = function(_parentElement, _data, _metaData, _eventHandler){
 
 
     // TODO: define all "constants" here
-
-
-
+    this.h = 330;
+    this.w = 650;
 
     this.initVis();
+    this.wrangleData();
+    this.updateVis();
 }
 
 
@@ -43,8 +44,6 @@ CountVis.prototype.initVis = function(){
 
     var that = this; // read about the this
 
-
-
     //TODO: implement here all things that don't change
     //TODO: implement here all things that need an initial status
     // Examples are:
@@ -54,17 +53,21 @@ CountVis.prototype.initVis = function(){
     // --- ONLY FOR BONUS ---  implement zooming
 
     // TODO: modify this to append an svg element, not modify the current placeholder SVG element
-    this.svg = this.parentElement.select("svg");
+    // this.svg = d3.select(this.parentElement);
+    // console.log(this.svg);
+    this.svg = d3.select(this.parentElement).append("svg")
+                 .attr("width", this.w)
+                 .attr("height", this.h)
+                 .style("background-color", 'red');
 
-    //TODO: implement the slider -- see example at http://bl.ocks.org/mbostock/6452972
+    // //TODO: implement the slider -- see example at http://bl.ocks.org/mbostock/6452972
     this.addSlider(this.svg)
 
+    // // filter, aggregate, modify data
+    // this.wrangleData();
 
-    // filter, aggregate, modify data
-    this.wrangleData();
-
-    // call the update method
-    this.updateVis();
+    // // call the update method
+    // this.updateVis();
 }
 
 
@@ -87,11 +90,11 @@ CountVis.prototype.wrangleData= function(){
  * @param _options -- only needed if different kinds of updates are needed
  */
 CountVis.prototype.updateVis = function(){
+    var that = this;
+    console.log(this.displayData);
 
     // TODO: implement update graphs (D3: update, enter, exit)
 
-
-}
 
 /**
  * Gets called by event handler and should create new aggregated data

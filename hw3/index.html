@@ -53,10 +53,7 @@
 
         <div class="row">
             <div class="col-md-9" id="countVis">
-                <!-- TODO: delete placeholder svg element -->
-                <svg width="650" height="330" style="background-color: lightblue">
-                    <text x="50" y="50">HERE should be CountVis</text>
-                </svg>
+
             </div>
             <div class="col-md-3" id="ageVis">
                 <!-- TODO: delete placeholder svg element -->
@@ -84,17 +81,6 @@
 
         $(function(){ // this function is called after the HTML document is fully loaded
             
-            queue()
-                .defer(d3.json, 'data/MYWorld_fields.json') // topojson polygons
-                .defer(d3.json, 'data/perDayData.json') // geojson points
-                .await(allDataLoaded);
-
-            function allDataLoaded(error, perDayData, myMetaData) { 
-                allData = perDayData;
-                metaData = myMetaData;
-
-                initVis();
-            }
 
             //==========================================
             //--- HERE IS WHERE ALL THE MAGIC STARTS --
@@ -111,14 +97,13 @@
 
             // call this function after Data is loaded, reformatted and bound to the variables
             var initVis = function(){
-                console.log(allData);
 
                 //TODO: Create an eventHandler  --> DONE :)
                 var MyEventHandler = new Object();
 
-
                 //TODO: Instantiate all Vis Objects here
-
+                cv = new CountVis('#countVis', allData, metaData, MyEventHandler);
+                //console.log(cv);
 
                 // TODO: bind the eventHandler to the Vis Objects
                 // events will be created from the CountVis object (nothing to do here)
@@ -181,6 +166,10 @@
 
                 //TODO: load data here and call "dataLoaded" afterwards
                 // Hint: http://giscollective.org/d3-queue-js/
+                queue()
+                    .defer(d3.json, 'data/perDayData.json') // geojson points
+                    .defer(d3.json, 'data/MYWorld_fields.json') // topojson polygons
+                    .await(dataLoaded);
 
                 // bind reset zoom button to a function (-- ONLY FOR BONUS --)
                 d3.select("#fitInBtn").on("click", function() {

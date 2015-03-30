@@ -4,7 +4,7 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
 
-var data = [1,1,1,1,1,1,1];
+var data = [1,1,1,1,1,1,1,1,1,1,1,1];
 
 var width = 960,
     height = 500,
@@ -12,7 +12,7 @@ var width = 960,
 
 var arc = d3.svg.arc()
     .outerRadius(radius - 10)
-    .innerRadius(0);
+    .innerRadius(radius - 15);
 
 var pie = d3.layout.pie();
 
