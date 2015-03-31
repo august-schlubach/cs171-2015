@@ -28,33 +28,11 @@ CountVis = function(_parentElement, _data, _metaData, _eventHandler){
 
 
     // TODO: define all "constants" here
+    this.margin = {top: 30, right: 20, bottom: 30, left: 80}
     this.h = 330;
     this.w = 650;
 
-    this.xScale = d3.time.scale()
-        .range([0, 600]);
-
-
-    yScale = d3.scale.linear()
-        .range([300, 0]);
-    this.yScale = yScale;
-    
-    this.xAxis = d3.svg.axis()
-        .scale(this.xScale)
-        .orient("bottom");
-
-    this.yAxis = d3.svg.axis()
-        .scale(this.yScale)
-        .orient("left");
-
-    this.area = d3.svg.area()
-        .x(function(d) { return d.time;  })
-        .y0(300)
-        .y1(function(d) { return yScale(d.count); });
-
     this.initVis();
-    this.wrangleData();
-    this.updateVis();
 }
 
 
@@ -73,22 +51,74 @@ CountVis.prototype.initVis = function(){
     // -  implement brushing !!
     // --- ONLY FOR BONUS ---  implement zooming
 
-    // TODO: modify this to append an svg element, not modify the current placeholder SVG element
-    // this.svg = d3.select(this.parentElement);
-    // console.log(this.svg);
-    this.svg = d3.select(this.parentElement).append("svg")
-                 .attr("width", this.w)
-                 .attr("height", this.h)
-                 .style("background-color", 'red');
+
+    xScale = d3.time.scale()
+        .range([0, 570]);
+
+    yScale = d3.scale.linear()
+        .range([280, 0]);
+
+    xAxis = d3.svg.axis()
+        .scale(xScale)
+        .ticks(8)
+        .orient("bottom");
+
+    yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left");
+
+
+    svg = d3.select(this.parentElement).append("svg")
+        .attr("width", this.w)
+        .attr("height", this.h)
+      .append("g")
+        .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0,280)")
+      .append("text")
+        .attr("x", 580)
+        .attr("y", 290)      
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Date");
+
+    svg.append("g")
+        .attr("class", "y axis")
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Count");
+
+
+    brush = d3.svg.brush()
+        .on('brush', function() {
+            console.log(that.brush.empty());
+            console.log(that.brush.extent());
+        });
+
+    svg.append("g")
+     .attr("class", "brush");
+
+
+    this.xAxis = xAxis;
+    this.yAxis = yAxis;
+    this.xScale = xScale;
+    this.yScale = yScale;
+    this.svg = svg;
+    this.brush = brush
 
     // //TODO: implement the slider -- see example at http://bl.ocks.org/mbostock/6452972
     this.addSlider(this.svg)
 
-    // // filter, aggregate, modify data
-    // this.wrangleData();
+    // filter, aggregate, modify data
+    this.wrangleData();
 
-    // // call the update method
-    // this.updateVis();
+    // call the update method
+    this.updateVis();
 }
 
 
@@ -104,25 +134,41 @@ CountVis.prototype.wrangleData= function(){
 
 }
 
-
-
 /**
  * the drawing function - should use the D3 selection, enter, exit
  * @param _options -- only needed if different kinds of updates are needed
  */
 CountVis.prototype.updateVis = function(){
     var that = this;
-    console.log(this.displayData);
+    svg = this.svg;
 
     // TODO: implement update graphs (D3: update, enter, exit)
-    this.xScale.domain(d3.extent(this.displayData, function(d) { return d.date; }));
-    this.yScale.domain([0, d3.max(this.displayData, function(d) { return d.count; })]);
 
-    this.svg.append("path")
-          .datum(this.displayData)
-          .attr("class", "area")
-          .attr("d", this.area);
+    that.xScale.domain(d3.extent(this.displayData, function(d) { return d.time; }));
+    that.yScale.domain([0, d3.max(this.displayData, function(d) { return d.count; })]);    
 
+    area = d3.svg.area()
+        .x(function(d) { return that.xScale(d.time);  })
+        .y0(280)
+        .y1(function(d) { return that.yScale(d.count); });
+
+    svg.append("path")
+        .datum(this.displayData)
+        .attr("class", "area")
+        .attr("d", area);
+
+    d3.select('.x')
+        .call(this.xAxis);
+
+    d3.select('.y')
+        .call(this.yAxis);
+
+    // handle brushing
+    this.brush.x(this.xScale);
+    svg.select('.brush')
+        .call(this.brush)
+      .selectAll('rect')
+        .attr('height', 280)
 }
 
 /**
@@ -184,7 +230,7 @@ CountVis.prototype.addSlider = function(svg){
 
     var sliderGroup = svg.append("g").attr({
         class:"sliderGroup",
-        "transform":"translate("+0+","+30+")"
+        "transform":"translate("+'-80'+","+30+")"
     })
 
     sliderGroup.append("rect").attr({
