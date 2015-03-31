@@ -69,6 +69,7 @@ CountVis.prototype.initVis = function(){
 
 
     svg = d3.select(this.parentElement).append("svg")
+        .attr('id', 'countVis-svg')
         .attr("width", this.w)
         .attr("height", this.h)
       .append("g")
@@ -96,8 +97,8 @@ CountVis.prototype.initVis = function(){
 
     brush = d3.svg.brush()
         .on('brush', function() {
-            console.log(that.brush.empty());
-            console.log(that.brush.extent());
+            that.eventHandler['empty'] = that.brush.empty();
+            that.eventHandler['extent'] = that.brush.extent();
         });
 
     svg.append("g")
@@ -215,7 +216,7 @@ CountVis.prototype.addSlider = function(svg){
         var sliderValue = sliderScale.invert(value);
 
         // TODO: do something here to deform the y scale
-        console.log("Y Axis Slider value: ", sliderValue);
+        //console.log("Y Axis Slider value: ", sliderValue);
 
 
         d3.select(this)
