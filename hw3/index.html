@@ -28,7 +28,21 @@
 
     <!-- add own stylesheet-->
     <link rel="stylesheet" type="text/css" href="css/myStyle.css">
+    <style>
 
+
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+    .area {
+      fill: steelblue;
+    }
+
+    </style>
 </head>
 <body>
     <div class="container">
@@ -52,9 +66,7 @@
         </div>
 
         <div class="row">
-            <div class="col-md-9" id="countVis">
-
-            </div>
+            <div class="col-md-9" id="countVis"></div>            
             <div class="col-md-3" id="ageVis">
                 <!-- TODO: delete placeholder svg element -->
                 <svg width="230" height="330" style="background-color: lightcoral">

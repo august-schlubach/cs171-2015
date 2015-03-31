@@ -31,6 +31,27 @@ CountVis = function(_parentElement, _data, _metaData, _eventHandler){
     this.h = 330;
     this.w = 650;
 
+    this.xScale = d3.time.scale()
+        .range([0, 600]);
+
+
+    yScale = d3.scale.linear()
+        .range([300, 0]);
+    this.yScale = yScale;
+    
+    this.xAxis = d3.svg.axis()
+        .scale(this.xScale)
+        .orient("bottom");
+
+    this.yAxis = d3.svg.axis()
+        .scale(this.yScale)
+        .orient("left");
+
+    this.area = d3.svg.area()
+        .x(function(d) { return d.time;  })
+        .y0(300)
+        .y1(function(d) { return yScale(d.count); });
+
     this.initVis();
     this.wrangleData();
     this.updateVis();
@@ -94,7 +115,15 @@ CountVis.prototype.updateVis = function(){
     console.log(this.displayData);
 
     // TODO: implement update graphs (D3: update, enter, exit)
+    this.xScale.domain(d3.extent(this.displayData, function(d) { return d.date; }));
+    this.yScale.domain([0, d3.max(this.displayData, function(d) { return d.count; })]);
 
+    this.svg.append("path")
+          .datum(this.displayData)
+          .attr("class", "area")
+          .attr("d", this.area);
+
+}
 
 /**
  * Gets called by event handler and should create new aggregated data
