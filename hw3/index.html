@@ -53,12 +53,7 @@
 
         <div class="row">
             <div class="col-md-9" id="countVis"></div>            
-            <div class="col-md-3" id="ageVis">
-                <!-- TODO: delete placeholder svg element -->
-                <svg width="230" height="330" style="background-color: lightcoral">
-                    <text x="50" y="50">HERE should be AgeVis</text>
-                </svg>
-            </div>
+            <div class="col-md-3" id="ageVis"></div>
         </div>
 
         <div class="row">
@@ -96,12 +91,10 @@
             // call this function after Data is loaded, reformatted and bound to the variables
             var initVis = function(){
 
-                //TODO: Create an eventHandler  --> DONE :)
                 var MyEventHandler = new Object();
 
-                //TODO: Instantiate all Vis Objects here
                 cv = new CountVis('#countVis', allData, metaData, MyEventHandler);
-                //console.log(cv);
+                av = new AgeVis('#ageVis', allData, metaData, MyEventHandler);
 
                 // TODO: bind the eventHandler to the Vis Objects
                 $( "#countVis-svg" ).bind( "click", function() {
@@ -151,9 +144,12 @@
                                 // TODO: Assign the count for each age to the index position
                                 // eg: res.ages[22] should contain the count value for age 22
                                 // BE AWARE THAT THE DATA MIGHT CONTAIN ages >99 which you have to handle especially
-                                // final result:
-                                // [0,0,0,..,1034,23,...] -- array length is 100
-
+                                var age = d.age;
+                                for (var i=0;i<age.length;i++) {
+                                    if (age[i].age != "" && age[i].age < 100) {
+                                        res.ages[age[i].age] = age[i]['count(*)'];
+                                    }
+                                }
 
                                 return res;
                             }

@@ -30,7 +30,7 @@ CountVis = function(_parentElement, _data, _metaData, _eventHandler){
     // TODO: define all "constants" here
     this.margin = {top: 30, right: 20, bottom: 30, left: 80}
     this.h = 330;
-    this.w = 650;
+    this.w = 850;
 
     this.initVis();
 }
@@ -53,7 +53,7 @@ CountVis.prototype.initVis = function(){
 
 
     xScale = d3.time.scale()
-        .range([0, 570]);
+        .range([0, 750]);
 
     yScale = d3.scale.linear()
         .range([280, 0]);
@@ -79,7 +79,7 @@ CountVis.prototype.initVis = function(){
         .attr("class", "x axis")
         .attr("transform", "translate(0,280)")
       .append("text")
-        .attr("x", 580)
+        .attr("x", 750)
         .attr("y", 290)      
         .attr("dy", ".71em")
         .style("text-anchor", "end")
@@ -132,7 +132,7 @@ CountVis.prototype.wrangleData= function(){
     // displayData should hold the data which is visualized
     // pretty simple in this case -- no modifications needed
     this.displayData = this.data;
-
+    //console.log(this.displayData);
 }
 
 /**

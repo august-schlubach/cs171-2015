@@ -52,3 +52,8 @@ path.area {
   fill: none;
   stroke: #000;
 }
+
+.y-age.axis line, .y-age.axis path {
+  fill: none;
+  stroke: #000;
+}
