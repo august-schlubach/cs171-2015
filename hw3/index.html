@@ -95,9 +95,7 @@
                         updateBrushText('start: ' + dateFormatter(cv.eventHandler['extent'][0]) + '  end: ' + dateFormatter(cv.eventHandler['extent'][1]));
                         av.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);
                         pv.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);  
-
                     });
-
                     if (cv.eventHandler['empty']) {
                         updateBrushText('');
                         av.onSelectionChange(null, null);
