@@ -17,11 +17,6 @@
     <!-- Get some nice font-->
     <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
 
-
-    <!--------------------------------->
-    <!-- FROM HERE ON IT IS HW3 stuff-->
-    <!--------------------------------->
-
     <!-- add own vis classes-->
     <script src = "js/priovis.js"></script>
     <script src = "js/agevis.js"></script>
@@ -37,7 +32,7 @@
 
         <div class="row">
             <div class="col-md-8 col-sm-12">
-               <p> The following visualization shows you the votes for MyWorld 2015. You can select a time range to see changes in the distribution of votes und distribution of age of the voters.</p>
+               <p> The following visualization shows you the votes for MyWorld 2015. You can select a time range to see changes in the distribution of votes and distribution of age of the voters.</p>
             </div>
 
         </div>
@@ -60,6 +55,7 @@
         <div class="row">
             <div class="col-md-12" id="prioVis"></div>
         </div>
+
         <div class="row">
             <div class="col-md-12">
                 <div class="spacer"></div>
@@ -71,13 +67,11 @@
     <script>
 
 
-        $(function(){ // this function is called after the HTML document is fully loaded
-            
+        $(function(){ 
+            var updateBrushText = function(text) {
+                $('#brushInfo').text(text);
+            }
 
-            //==========================================
-            //--- HERE IS WHERE ALL THE MAGIC STARTS --
-            //==========================================
-            // variables keeping global knowledge of the data
             var allData = [];
             var metaData = {};
 
@@ -87,7 +81,6 @@
             var dateFormatter = d3.time.format("%Y-%m-%d");
 
 
-            // call this function after Data is loaded, reformatted and bound to the variables
             var initVis = function(){
 
                 var MyEventHandler = new Object();
@@ -97,15 +90,30 @@
                 pv = new PrioVis('#prioVis', allData, metaData, MyEventHandler);
 
                 // TODO: bind the eventHandler to the Vis Objects
-                $( "#countVis-svg" ).bind( "click", function() {
-                    av.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);
-                });
-                // events will be created from the CountVis object (nothing to do here)
-                // events will be consumed by the PrioVis and AgeVis object (binding should happen here)
+                $( "#countVis-svg" ).bind( "mousedown", function() {
+                    $( "#countVis-svg" ).bind( "mousemove", function() {  
+                        updateBrushText('start: ' + dateFormatter(cv.eventHandler['extent'][0]) + '  end: ' + dateFormatter(cv.eventHandler['extent'][1]));
+                        av.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);
+                        pv.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);  
 
+                    });
+
+                    if (cv.eventHandler['empty']) {
+                        updateBrushText('');
+                        av.onSelectionChange(null, null);
+                        pv.onSelectionChange(null, null);
+                    }
+                    else {
+                        updateBrushText('start: ' + dateFormatter(cv.eventHandler['extent'][0]) + '  end: ' + dateFormatter(cv.eventHandler['extent'][1]));
+                        av.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);
+                        pv.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);                    
+                    }
+                });
+                $( "#countVis-svg" ).bind( "mouseup ", function() {
+                    $( "#countVis-svg" ).unbind( "mousemove");
+                });
             }
 
-            // call this function after both files are loaded -- error should be "null" if no error
             var dataLoaded = function (error, _allData, _metaData) {
 
                 if (!error) {
@@ -128,7 +136,7 @@
                                     count: parseInt(d["count(*)"])
                                 };
 
-                                // TODO: implement that  !!
+                                // add sum(p*) to the data object                                 
                                 res.prio = d3.range(0,16). map(function(){return 0;})
                                 for (var v=0;v<16;v++) {
                                     key = 'sum(p' + v + ')';
@@ -140,8 +148,6 @@
                                 res.ages = d3.range(0,99). map(function(){return 0;})
 
                                 // TODO: Assign the count for each age to the index position
-                                // eg: res.ages[22] should contain the count value for age 22
-                                // BE AWARE THAT THE DATA MIGHT CONTAIN ages >99 which you have to handle especially
                                 var age = d.age;
                                 for (var i=0;i<age.length;i++) {
                                     if (age[i].age != "" && age[i].age < 100) {
@@ -156,6 +162,7 @@
                     metaData = _metaData;
                     initVis();
                 }
+
             }
 
             var startHere = function(){
@@ -171,7 +178,6 @@
                 d3.select("#fitInBtn").on("click", function() {
                     // TODO: -- ONLY FOR BONUS --
                 });
-
 
             }
 

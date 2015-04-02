@@ -7,10 +7,11 @@ PrioVis = function(_parentElement, _data, _metaData, _eventHandler){
     this.displayData = [];
 
 
-    // TODO: define all "constants" here
+    // define all "constants" here
     this.margin = {top: 30, right: 20, bottom: 30, left: 80}
     this.h = 550;
     this.w = 850;
+    this.duration = 300;
 
     this.initVis();
 }
@@ -19,8 +20,6 @@ PrioVis = function(_parentElement, _data, _metaData, _eventHandler){
  * Method that sets up the SVG and the variables
  */
 PrioVis.prototype.initVis = function(){
-
-    var that = this; // read about the this
 
     var yScale = d3.scale.linear()
         .range([290, 0]);
@@ -46,19 +45,22 @@ PrioVis.prototype.initVis = function(){
         .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
     svg.append("g")
+        .attr("id", "prio-data-g");
+        
+    svg.append("g")
         .attr("class", "x-prio axis")
         .attr("transform", "translate(0,290)");
 
     svg.append("g")
         .attr("class", "y-prio axis");
                
-
-    this.yAxis = yAxis;
-    this.xAxis = xAxis;
+    // make these variables properties of the PrioVis object
+    this.yAxis  = yAxis;
+    this.xAxis  = xAxis;
     this.yScale = yScale;
     this.xScale = xScale; 
-    this.color = color;   
-    this.svg = svg;
+    this.color  = color;   
+    this.svg    = svg;
 
     // filter, aggregate, modify data
     this.wrangleData(null);
@@ -89,37 +91,33 @@ PrioVis.prototype.wrangleData= function(_filterFunction){
  */
 PrioVis.prototype.updateVis = function(){
 
-    // Dear JS hipster,
-    // you might be able to pass some options as parameter _option
-    // But it's not needed to solve the task.
     // var options = _options || {};
 
-
-    // TODO: implement...
-    // TODO: ...update scales
-    // TODO: ...update graphs
     var that = this;
     svg = this.svg;
 
-    // TODO: implement update graphs (D3: update, enter, exit)
     that.xScale.domain(this.displayData.map(function(d) { return d.title; }));    
     that.yScale.domain([0, d3.max(this.displayData, function(d) { return d.total; })]);    
 
-    var rows = svg.append("g")
-                .selectAll("g.row")
-                .data(that.displayData)
-              .enter()
-                .append("g");
+    var g = d3.select('#prio-data-g');
+    var bar = g.selectAll(".bar")
+        .data(that.displayData);
 
-    var bars = rows
-                .append("rect")
-                .attr("fill", function(d,i) { return that.color(i); })
-                .attr("width", 40)
-                .attr("height", function(d) { return 290-that.yScale(d.total); })
-                .attr("x", function(d) { return that.xScale(d.title); } )
-                .attr("y", function(d) { return that.yScale(d.total); } );
+    bar.enter().append("rect")
+        .attr("class", "bar")
+        .attr("fill", function(d,i) { return that.color(i); })
+        .attr("width", 40)
+        .attr("height", function(d) { return 290-that.yScale(d.total); })
+        .attr("x", function(d) { return that.xScale(d.title); } )
+        .attr("y", function(d) { return that.yScale(d.total); } );
+    bar.exit().remove();
+    bar.transition()
+        .duration(this.duration)
+        .attr("y", function(d) { return that.yScale(d.total); })
+        .attr("height", function(d) { return 290-that.yScale(d.total); });         
 
     d3.select('.y-prio')
+        .transition().duration(this.duration).ease("sin-in-out")
         .call(that.yAxis);
 
     d3.select('.x-prio')
@@ -142,12 +140,17 @@ PrioVis.prototype.updateVis = function(){
  * @param selection
  */
 PrioVis.prototype.onSelectionChange= function (selectionStart, selectionEnd){
-    filterByDate = function() { 
-        return true; 
+    filterByDate = function(date) { 
+        if (!selectionStart) { return true };
+        if ((date>=selectionStart) && (date<=selectionEnd)) {
+            return true; 
+        }
+        else {
+            return false;
+        }
     };
 
-    // TODO: call wrangle function
-
+    this.wrangleData(filterByDate);
     this.updateVis();
 }
 
@@ -170,7 +173,6 @@ PrioVis.prototype.onSelectionChange= function (selectionStart, selectionEnd){
 PrioVis.prototype.filterAndAggregate = function(_filter){
 
     filterData = this.data;
-    var that   = this;
 
     // Set filter to a function that accepts all items
     // ONLY if the parameter _filter is NOT null use this parameter
@@ -184,7 +186,7 @@ PrioVis.prototype.filterAndAggregate = function(_filter){
     // create an array of values for prio sums
     var res = d3.range(0,16). map(function(){return 0;})
     for (var i=0;i<filterData.length;i++) {
-        if (filter(filterData[0])) {
+        if (filter(filterData[i].time)) {
             for (var v=0;v<16;v++) {
                 key = 'sum(p' + v + ')';
                 if (!isNaN(filterData[i].prio[v])) {                     
@@ -197,7 +199,7 @@ PrioVis.prototype.filterAndAggregate = function(_filter){
     for (var v=0;v<16;v++) {
         aggregateData.push({ title: displayMetaData[v], total: res[v] });
     }
-    console.log(aggregateData);
+
     return aggregateData;
 }
 
