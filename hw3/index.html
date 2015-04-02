@@ -98,8 +98,7 @@
 
                 // TODO: bind the eventHandler to the Vis Objects
                 $( "#countVis-svg" ).bind( "click", function() {
-                    alert( "start :" + cv.eventHandler['extent'][0] );
-                    console.log(cv);
+                    av.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);
                 });
                 // events will be created from the CountVis object (nothing to do here)
                 // events will be consumed by the PrioVis and AgeVis object (binding should happen here)

@@ -132,6 +132,15 @@ AgeVis.prototype.updateVis = function(){
         .attr("class", "area")
         .attr("d", area);
 
+    // path = svg.selectAll('path').data([this.displayData])
+    // path.attr('d', function(d){return line(d) + 'Z'})
+    //     .style('stroke-width', 1)
+    //     .style('stroke', 'steelblue');
+    // path.enter().append('svg:path').attr('d', function(d){return line(d) + 'Z'})
+    //     .style('stroke-width', 1)
+    //     .style('stroke', 'steelblue');
+    // path.exit().remove()
+
     d3.select('.y-age')
         .call(that.yAxis);
 
@@ -148,12 +157,16 @@ AgeVis.prototype.updateVis = function(){
  * @param selection
  */
 AgeVis.prototype.onSelectionChange= function (selectionStart, selectionEnd){
-    filterByDate = function() { 
-        return true; 
+    filterByDate = function(date) { 
+        if ((date>=selectionStart) && (date<=selectionEnd)) {
+            return true; 
+        }
+        else {
+            return false;
+        }
     };
-
     // TODO: call wrangle function
-
+    this.wrangleData(filterByDate);
     this.updateVis();
 
 
@@ -194,7 +207,7 @@ AgeVis.prototype.filterAndAggregate = function(_filter){
         return 0;
     });
     for (var i=0;i<filterData.length;i++) {
-        if (filter(filterData[0])) {
+        if (filter(filterData[i].time)) {
             for (var v=0;v<100;v++) {
                 if (!isNaN(filterData[i].ages[v])) { 
                     res[v] += filterData[i].ages[v];
