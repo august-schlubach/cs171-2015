@@ -43,7 +43,6 @@ AgeVis.prototype.initVis = function(){
 
     var that = this; // read about the this
 
-
     //TODO: construct or select SVG
     //TODO: create axis and scales
     var yScale = d3.scale.linear()

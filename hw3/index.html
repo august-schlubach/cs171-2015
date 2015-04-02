@@ -9,6 +9,7 @@
     <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
     <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
     <script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="http://d3js.org/colorbrewer.v1.min.js"></script>
 
     <!--Stylesheets-->
     <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
@@ -57,15 +58,13 @@
         </div>
 
         <div class="row">
-            <div class="col-md-12" id="prioVis">
-                <!-- TODO: delete placeholder svg element -->
-                <svg width="650" height="440" style="background-color: lightgreen">
-                    <text x="50" y="50">HERE should be PrioVis</text>
-                </svg>
-            </div>
-
+            <div class="col-md-12" id="prioVis"></div>
         </div>
-
+        <div class="row">
+            <div class="col-md-12">
+                <div class="spacer"></div>
+            </div>
+        </div>
     </div> <!-- end container -->
 
 
@@ -95,6 +94,7 @@
 
                 cv = new CountVis('#countVis', allData, metaData, MyEventHandler);
                 av = new AgeVis('#ageVis', allData, metaData, MyEventHandler);
+                pv = new PrioVis('#prioVis', allData, metaData, MyEventHandler);
 
                 // TODO: bind the eventHandler to the Vis Objects
                 $( "#countVis-svg" ).bind( "click", function() {
@@ -130,12 +130,11 @@
                                 };
 
                                 // TODO: implement that  !!
-                                res.prios = []
-                                // should be an array of 16 numbers with the total count MAPping the prio values,
-                                //  [d["sum(p0)"], d["sum(p1)"], d["sum(p2)"],...]
-                                // Example:
-                                // [10,200,500,... ]
-
+                                res.prio = d3.range(0,16). map(function(){return 0;})
+                                for (var v=0;v<16;v++) {
+                                    key = 'sum(p' + v + ')';
+                                    res.prio[v] = d[key];
+                                }
 
                                 // This is ONE way to create an array of length 100
                                 // and set every value to "0")
