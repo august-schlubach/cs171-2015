@@ -47,12 +47,10 @@ CountVis.prototype.initVis = function(){
         .range([0, 750]);
 
 
-
     xAxis = d3.svg.axis()
         .scale(xScale)
         .ticks(8)
         .orient("bottom");
-
 
     svg = d3.select(this.parentElement).append("svg")
         .attr('id', 'countVis-svg')

@@ -91,17 +91,22 @@
 
                 // TODO: bind the eventHandler to the Vis Objects
                 $( "#countVis-svg" ).bind( "mousedown", function() {
-                    $( "#countVis-svg" ).bind( "mousemove", function() {  
+                    $( "#countVis-svg" ).bind( "mousemove", function() { 
+                        if (cv.eventHandler['empty'] 
+                            && dateFormatter(cv.eventHandler['extent'][0]) == dateFormatter(cv.eventHandler['extent'][0])) {
+                            return true;
+                        }  
                         updateBrushText('start: ' + dateFormatter(cv.eventHandler['extent'][0]) + '  end: ' + dateFormatter(cv.eventHandler['extent'][1]));
                         av.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);
                         pv.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);  
-                    });
+                    });  
+
                     if (cv.eventHandler['empty']) {
                         updateBrushText('');
                         av.onSelectionChange(null, null);
                         pv.onSelectionChange(null, null);
                     }
-                    else {
+                    else {                      
                         updateBrushText('start: ' + dateFormatter(cv.eventHandler['extent'][0]) + '  end: ' + dateFormatter(cv.eventHandler['extent'][1]));
                         av.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);
                         pv.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);                    
