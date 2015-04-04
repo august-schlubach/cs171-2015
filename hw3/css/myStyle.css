@@ -60,3 +60,10 @@ path.area {
 .spacer{
   margin-top: 150px;
 }
+.sm-spacer{
+  margin-top: 50px;
+}
+.label
+{
+  background: grey;
+}
