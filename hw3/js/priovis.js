@@ -6,6 +6,11 @@ PrioVis = function(_parentElement, _data, _metaData, _eventHandler){
     this.eventHandler = _eventHandler;
     this.displayData = [];
 
+    // variables for the comparison functionality
+    this.saveStart = null;
+    this.saveEnd = null;
+    this.cacheData = d3.range(0,16). map(function(){return 0;});
+    this.circleRadius = 0;
 
     // define all "constants" here
     this.margin = {top: 30, right: 20, bottom: 30, left: 80}
@@ -46,6 +51,9 @@ PrioVis.prototype.initVis = function(){
 
     svg.append("g")
         .attr("id", "prio-data-g");
+
+    svg.append("g")
+        .attr("id", "saved-prio-data-g");        
         
     svg.append("g")
         .attr("class", "x-prio axis")
@@ -97,7 +105,11 @@ PrioVis.prototype.updateVis = function(){
     svg = this.svg;
 
     that.xScale.domain(this.displayData.map(function(d) { return d.title; }));    
-    that.yScale.domain([0, d3.max(this.displayData, function(d) { return d.total; })]);    
+    var maxD = d3.max(this.displayData, function(d) { return d.total; });
+    var maxC = d3.max(this.displayData, function(d) { return d.saved; });
+    that.yScale.domain([0, Math.max(maxC,maxD)]);
+    //that.yScale.domain([0, 900000]);
+  
 
     var g = d3.select('#prio-data-g');
     var bar = g.selectAll(".bar")
@@ -116,6 +128,23 @@ PrioVis.prototype.updateVis = function(){
         .attr("y", function(d) { return that.yScale(d.total); })
         .attr("height", function(d) { return 290-that.yScale(d.total); });         
 
+
+    var g = d3.select('#saved-prio-data-g');
+    var circle = g.selectAll(".circle")
+        .data(that.displayData);
+
+    circle.enter().append("circle")
+        .attr("class", "circle")
+        .attr('r', this.circleRadius)
+        .attr("cx", function(d) { return that.xScale(d.title) + 20; } )
+        .attr("cy", function(d) { return that.yScale(d.saved); } );
+    circle.exit().remove();
+    circle.transition()
+        .duration(this.duration)
+        .attr('r', this.circleRadius)
+        .attr("cy", function(d) { return that.yScale(d.saved); });
+
+
     d3.select('.y-prio')
         .transition().duration(this.duration).ease("sin-in-out")
         .call(that.yAxis);
@@ -129,7 +158,6 @@ PrioVis.prototype.updateVis = function(){
             .attr("transform", function(d) {
                 return "rotate(-65)" 
                 });
-
 }
 
 
@@ -155,6 +183,29 @@ PrioVis.prototype.onSelectionChange= function (selectionStart, selectionEnd){
 }
 
 
+PrioVis.prototype.saveSelection = function (selectionStart, selectionEnd){
+    this.saveStart = null;
+    this.saveEnd   = null;
+    this.cacheData = d3.range(0,16). map(function(){return 0;});
+    this.wrangleData(filterByDate);       
+    this.updateVis();  
+
+    this.saveStart    = selectionStart;
+    this.saveEnd      = selectionEnd;
+    this.cacheData    = this.displayData;
+    this.circleRadius = 5;
+    this.wrangleData(filterByDate);
+    this.updateVis();
+}
+
+PrioVis.prototype.clearSelection = function (){
+    this.saveStart    = null;
+    this.saveEnd      = null;
+    this.cacheData    = d3.range(0,16). map(function(){return 0;});
+    this.circleRadius = 0;    
+    this.updateVis();    
+}
+
 /*
 *
 * ==================================
@@ -173,7 +224,7 @@ PrioVis.prototype.onSelectionChange= function (selectionStart, selectionEnd){
 PrioVis.prototype.filterAndAggregate = function(_filter){
 
     filterData = this.data;
-
+    cacheData = this.cacheData;
     // Set filter to a function that accepts all items
     // ONLY if the parameter _filter is NOT null use this parameter
     var filter = _filter || function(){return true;}
@@ -197,7 +248,14 @@ PrioVis.prototype.filterAndAggregate = function(_filter){
     }
     var aggregateData = new Array();
     for (var v=0;v<16;v++) {
-        aggregateData.push({ title: displayMetaData[v], total: res[v] });
+        var saved;
+        if (cacheData[v]) {
+            saved = cacheData[v].saved;
+        }
+        else {
+            saved = res[v];
+        }
+        aggregateData.push({ title: displayMetaData[v], total: res[v], saved: saved });
     }
 
     return aggregateData;

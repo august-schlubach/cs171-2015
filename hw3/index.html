@@ -48,9 +48,12 @@
             <div class="col-md-3">
             <span class="label">Number of votes</span>
             </div>
-            <div class="col-md-6">
-                <b>current brush:</b> <span id="brushInfo"></span>
-            </div>            
+            <div class="col-md-5">
+                <b>current brush:</b> <span id="brushInfo">none</span>
+            </div>
+            <div class="col-md-1">
+                <button id="save">Save</button>
+            </div>                         
             <div class="col-md-3">
             <span class="label">Age Distribution</span>
             </div>
@@ -65,14 +68,19 @@
         </div>
 
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-3">
                 <span class="label">Distribution of Priorities</span>
             </div>
+            <div class="col-md-5">
+                <b>saved brush:</b> <span id="saveInfo">none</span>
+            </div>
+            <div class="col-md-1">
+                <button id='clear'>Clear</button>
+            </div>             
         </div>
         <div class="row">
-            <div class="col-md-12" id="prioVis"></div>
+            <div class="col-md-10" id="prioVis"></div>
         </div>
-
         <div class="row">
             <div class="col-md-12">
                 <div class="spacer"></div>
@@ -85,9 +93,20 @@
 
 
         $(function(){ 
-            var updateBrushText = function(text) {
-                $('#brushInfo').text(text);
+            var that = this;
+
+            var updateBrushText = function(_selector,_start,_end) {
+                var text;
+                if (_start) {
+                    text = 'start: ' + dateFormatter(_start) + '  end: ' + dateFormatter(_end) || '';
+                }
+                else {
+                    text = 'none';
+                }
+                $(_selector).text(text);
             }
+
+
 
             var allData = [];
             var metaData = {};
@@ -97,7 +116,26 @@
             // see: https://github.com/mbostock/d3/wiki/Time-Formatting
             var dateFormatter = d3.time.format("%Y-%m-%d");
 
+            $( "#save" ).click(function() {
+                if (!cv.eventHandler['empty']) {
+                    that.pv.saveSelection(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);
+                    updateBrushText('#saveInfo',cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);
+                }
+                else {
+                    alert('Brush must be active to save selection.');
+                }
+            });
 
+            $( "#clear" ).click(function() {
+              that.pv.clearSelection();
+              updateBrushText('#saveInfo',null,null);
+              if (cv.eventHandler['empty']) {
+                pv.onSelectionChange(null, null);
+              }
+              else {
+                pv.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);
+              }
+            });
             var initVis = function(){
 
                 var MyEventHandler = new Object();
@@ -105,7 +143,7 @@
                 cv = new CountVis('#countVis', allData, metaData, MyEventHandler);
                 av = new AgeVis('#ageVis', allData, metaData, MyEventHandler);
                 pv = new PrioVis('#prioVis', allData, metaData, MyEventHandler);
-
+                that.pv = pv;
                 // TODO: bind the eventHandler to the Vis Objects
                 $( "#countVis-svg" ).bind( "mousedown", function() {
                     $( "#countVis-svg" ).bind( "mousemove", function() { 
@@ -113,18 +151,18 @@
                             && dateFormatter(cv.eventHandler['extent'][0]) == dateFormatter(cv.eventHandler['extent'][0])) {
                             return true;
                         }  
-                        updateBrushText('start: ' + dateFormatter(cv.eventHandler['extent'][0]) + '  end: ' + dateFormatter(cv.eventHandler['extent'][1]));
+                        updateBrushText('#brushInfo',cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);
                         av.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);
                         pv.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);  
                     });  
 
                     if (cv.eventHandler['empty']) {
-                        updateBrushText('');
+                        updateBrushText('#brushInfo',null,null);
                         av.onSelectionChange(null, null);
                         pv.onSelectionChange(null, null);
                     }
                     else {                      
-                        updateBrushText('start: ' + dateFormatter(cv.eventHandler['extent'][0]) + '  end: ' + dateFormatter(cv.eventHandler['extent'][1]));
+                        updateBrushText('#brushInfo',cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);
                         av.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);
                         pv.onSelectionChange(cv.eventHandler['extent'][0],cv.eventHandler['extent'][1]);                    
                     }

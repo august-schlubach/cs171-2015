@@ -67,3 +67,15 @@ path.area {
 {
   background: grey;
 }
+.circle {
+  fill: #fff;
+  stroke: #666;
+  stroke-width: 1.5px;
+  opacity: 1;
+}
+.circle-off {
+  fill: #fff;
+  stroke: #666;
+  stroke-width: 1.5px;
+  opacity: 0;
+}
